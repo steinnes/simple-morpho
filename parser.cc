@@ -83,23 +83,35 @@ F -> T - T
 T -> tala | '(' F ')'
 
 */
+Binary *parseBinOp(FlexLexer *l);
 
-Integer *parseInt(FlexLexer *l)
+Integer *parseTerm(FlexLexer *l)
 {
 	int token = l->yylex();
-	if (token != INT)
+	if (token == INT)
+	{
+		int num = atoi(l->YYText());
+		return new Integer(num);
+	}
+	if (token != LPAREN)
 	{
 		char err[256];
-		sprintf(err, "Expected INT, got: %d (%s)\n\0", token, l->YYText());
+		sprintf(err, "Expected LPAREN, got: %d (%s)\n\0", token, l->YYText());
 		error(err);
 	}
-	int num = atoi(l->YYText());
-	return new Integer(num);
+	Binary *op = parseBinOp(l);
+	token = l->yylex();
+	if (token != RPAREN)
+	{
+		char err[256];
+		sprintf(err, "Expected RPAREN, got: %d (%s)\n\0", token, l->YYText());
+		error(err);
+	}
 }
 
 Binary *parseBinOp(FlexLexer *l)
 {
-	Integer *a = parseInt(l);
+	Integer *a = parseTerm(l);
 	int token = l->yylex();
 	if (token != OP)
 	{
@@ -110,7 +122,7 @@ Binary *parseBinOp(FlexLexer *l)
 
 	char op = l->YYText()[0];
 
-	Integer *b = parseInt(l);
+	Integer *b = parseTerm(l);
 
 	switch (op)
 	{
