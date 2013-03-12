@@ -1,4 +1,5 @@
 #include <FlexLexer.h>
+#include <string.h>
 
 class SLexer
 {
@@ -27,15 +28,15 @@ public:
 	{
 		if (PEEKED) { return last_str; }
 		if (last_str != NULL)
-			free(last_str); // free due to strdup
+			delete last_str; // free due to strdup
 		return l->YYText();
 	}
-	int peek();
+	int peek()
 	{
 		PEEKED = 1;
 		last_tok = l->yylex();
 		last_str = strdup(l->YYText());
 		return last_tok;
 	}
-}
+};
 
