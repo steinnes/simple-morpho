@@ -26,10 +26,12 @@ public:
 	}
 	char *text()
 	{
-		if (PEEKED) { return last_str; }
+		if (PEEKED) { return last_str; }
+
+
 		if (last_str != NULL)
 			delete last_str; // free due to strdup
-		return l->YYText();
+		return (char *)l->YYText();
 	}
 	int peek()
 	{
