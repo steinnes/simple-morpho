@@ -16,5 +16,4 @@ tokensyy.o: tokensyy.cc
 clean:
 	rm tokensyy.cc
 	rm parser
-	rm testparse
 	rm *.o

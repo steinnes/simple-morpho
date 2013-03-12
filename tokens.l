@@ -22,7 +22,9 @@ WHITESPACE      [\n\r\ \t\b\012]
 {OP} 				{ return(OP); }
 {NEWLINE} 			{ line++; }
 {WHITESPACE} 			{ }  // skip whitespaces
-"("|")"|"{"|"}"|","|";"         return (int)yytext[0]; // delimiters
+"{"|"}"|","|";"         return (int)yytext[0]; // delimiters
+"("				{ return(LPAREN); }
+")"				{ return(RPAREN); }
 
 %%
 

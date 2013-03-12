@@ -77,6 +77,13 @@ void error(char *errstr)
 	exit(1);
 }
 
+/* grammar:
+F -> T + T
+F -> T - T
+T -> tala | '(' F ')'
+
+*/
+
 Integer *parseInt(FlexLexer *l)
 {
 	int token = l->yylex();

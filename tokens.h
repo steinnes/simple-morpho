@@ -8,5 +8,8 @@
 #define SEP    5
 #define ERROR -1
 
+#define LPAREN 6
+#define RPAREN 7
+
 
 #endif
