@@ -32,7 +32,7 @@ public:
 		this->right = right;
 	}
 
-	int compute()
+	int compute() const
 	{
 		switch(op)
 		{
@@ -90,8 +90,39 @@ Integer *parseInt(FlexLexer *l)
 	return new Integer(num);
 }
 
+Binary *parseBinOp(FlexLexer *l)
+{
+	Integer *a = parseInt(l);
+	int token = l->yylex();
+	if (token != OP)
+	{
+		char err[256];
+		sprintf(err, "Expected OP, got: %d (%s)\n\0", token, l->YYText());
+		error(err);
+	}
+
+	char op = l->YYText()[0];
+
+	Integer *b = parseInt(l);
+
+	switch (op)
+	{
+		case '+':
+			return new Binary('+', a, b);
+		case '-':
+			return new Binary('-', a, b);
+		default:
+			char err[256];
+			sprintf(err, "Unsupported OP, got: %d (%s)\n\0", token, l->YYText());
+			error(err);
+		break;
+	}
+	return NULL;
+}
+
 int main(void)
 {
 	FlexLexer *lexer = new yyFlexLexer;
-	token = lexer->yylex();
+	Expression *e = parseBinOp(lexer);
+	cout << e->compute() << endl;
 }

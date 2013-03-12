@@ -12,13 +12,13 @@ int line = 1;
 %option noyywrap
 %option yylineno
 
-VALUE 		[0-9\.]+
+INT 		[0-9\.]+
 OP 		[+\-]
 NEWLINE 	\r|\n|\r\n
 WHITESPACE      [\n\r\ \t\b\012]
 
 %%
-{VALUE} 			{ return(VALUE); }
+{INT} 				{ return(INT); }
 {OP} 				{ return(OP); }
 {NEWLINE} 			{ line++; }
 {WHITESPACE} 			{ }  // skip whitespaces
