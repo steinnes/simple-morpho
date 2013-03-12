@@ -3,8 +3,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
-#include <FlexLexer.h>
 #include "tokens.h"
+#include "slexer.h"
 
 using namespace std;
 int token;
@@ -89,52 +89,52 @@ T = parseTerm
 
 
 */
-Binary *parseFormula(FlexLexer *l);
+Binary *parseFormula(SLexer *l);
 
-Expression *parseTerm(FlexLexer *l)
+Expression *parseTerm(SLexer *l)
 {
-	int token = l->yylex();
+	int token = l->advance();
 	if (token == INT)
 	{
-		int num = atoi(l->YYText());
+		int num = atoi(l->text());
 		return new Integer(num);
 	}
 	if (token != LPAREN)
 	{
 		char err[256];
-		sprintf(err, "Expected LPAREN, got: %d (%s)\n\0", token, l->YYText());
+		sprintf(err, "Expected LPAREN, got: %d (%s)\n\0", token, l->text());
 		error(err);
 	}
 	Binary *op = parseFormula(l);
-	token = l->yylex();
+	token = l->advance();
 	if (token != RPAREN)
 	{
 		char err[256];
-		sprintf(err, "Expected RPAREN, got: %d (%s)\n\0", token, l->YYText());
+		sprintf(err, "Expected RPAREN, got: %d (%s)\n\0", token, l->text());
 		error(err);
 	}
 	return op;
 }
 
-Expression *parseLumma(FlexLexer *l)
+Expression *parseLumma(SLexer *l)
 {
-	int token = l->yylex();
+	int token = l->advance();
 	// þyrfti að peek-a hér..
 	
 }
 
-Binary *parseFormula(FlexLexer *l)
+Binary *parseFormula(SLexer *l)
 {
 	Expression *a = parseTerm(l);
-	int token = l->yylex();
+	int token = l->advance();
 	if (token != OP)
 	{
 		char err[256];
-		sprintf(err, "Expected OP, got: %d (%s)\n\0", token, l->YYText());
+		sprintf(err, "Expected OP, got: %d (%s)\n\0", token, l->text());
 		error(err);
 	}
 
-	char op = l->YYText()[0];
+	char op = l->text()[0];
 
 	Expression *b = parseTerm(l);
 
@@ -146,7 +146,7 @@ Binary *parseFormula(FlexLexer *l)
 			return new Binary('-', a, b);
 		default:
 			char err[256];
-			sprintf(err, "Unsupported OP, got: %d (%s)\n\0", token, l->YYText());
+			sprintf(err, "Unsupported OP, got: %d (%s)\n\0", token, l->text());
 			error(err);
 		break;
 	}
@@ -155,7 +155,7 @@ Binary *parseFormula(FlexLexer *l)
 
 int main(void)
 {
-	FlexLexer *lexer = new yyFlexLexer;
+	SLexer *lexer = new SLexer;
 	Expression *e = parseFormula(lexer);
 	cout << e->compute() << endl;
 }
