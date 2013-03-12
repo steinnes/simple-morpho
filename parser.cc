@@ -36,12 +36,12 @@ public:
 	{
 		switch(op)
 		{
+			case '*':
+				return left->compute() * right->compute();
 			case '-':
 				return left->compute() - right->compute();
-				break;
 			case '+':
 				return left->compute() + right->compute();
-				break;
 			default:
 				std::cout << "unknown op:" << op << std::endl;
 		}
@@ -78,19 +78,24 @@ void error(char *errstr)
 }
 
 /* grammar:
-F -> T + T
-F -> T - T
+
+F -> L | L + L | L - L
+L -> T | T * T
 T -> tala | '(' F ')'
 
+F = parseFormula
+L = parseLumma
+T = parseTerm
+
+
 */
-Binary *parseBinOp(FlexLexer *l);
+Binary *parseFormula(FlexLexer *l);
 
 Expression *parseTerm(FlexLexer *l)
 {
 	int token = l->yylex();
 	if (token == INT)
 	{
-		cout << "Returning new Integer(" << l->YYText() << ")" << endl;
 		int num = atoi(l->YYText());
 		return new Integer(num);
 	}
@@ -100,7 +105,7 @@ Expression *parseTerm(FlexLexer *l)
 		sprintf(err, "Expected LPAREN, got: %d (%s)\n\0", token, l->YYText());
 		error(err);
 	}
-	Binary *op = parseBinOp(l);
+	Binary *op = parseFormula(l);
 	token = l->yylex();
 	if (token != RPAREN)
 	{
@@ -111,7 +116,14 @@ Expression *parseTerm(FlexLexer *l)
 	return op;
 }
 
-Binary *parseBinOp(FlexLexer *l)
+Expression *parseLumma(FlexLexer *l)
+{
+	int token = l->yylex();
+	// þyrfti að peek-a hér..
+	
+}
+
+Binary *parseFormula(FlexLexer *l)
 {
 	Expression *a = parseTerm(l);
 	int token = l->yylex();
@@ -144,6 +156,6 @@ Binary *parseBinOp(FlexLexer *l)
 int main(void)
 {
 	FlexLexer *lexer = new yyFlexLexer;
-	Expression *e = parseBinOp(lexer);
+	Expression *e = parseFormula(lexer);
 	cout << e->compute() << endl;
 }

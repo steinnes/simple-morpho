@@ -13,7 +13,7 @@ int line = 1;
 %option yylineno
 
 INT 		[0-9\.]+
-OP 		[+\-]
+OP 		[+\-\*]
 NEWLINE 	\r|\n|\r\n
 WHITESPACE      [\n\r\ \t\b\012]
 
