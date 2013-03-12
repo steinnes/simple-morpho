@@ -3,7 +3,7 @@
 
 #define NAME   1
 #define OP     2
-#define VALUE  3
+#define INT    3
 #define VAR    4
 #define SEP    5
 #define ERROR -1

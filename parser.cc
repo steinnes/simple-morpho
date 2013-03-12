@@ -1,7 +1,10 @@
 #include <ctype.h>
 #include <iostream>
+#include <stdio.h>
 #include <stdlib.h>
+#include <string>
 #include <FlexLexer.h>
+#include "tokens.h"
 
 using namespace std;
 int token;
@@ -64,18 +67,31 @@ public:
 	{
 		this->val = val;
 	}
-	int compute()	{ return val; }
+	int compute() const { return val; }
 	void print()	{ std::cout << val; }
 };
+
+void error(char *errstr)
+{
+	cerr << errstr << endl;
+	exit(1);
+}
+
+Integer *parseInt(FlexLexer *l)
+{
+	int token = l->yylex();
+	if (token != INT)
+	{
+		char err[256];
+		sprintf(err, "Expected INT, got: %d (%s)\n\0", token, l->YYText());
+		error(err);
+	}
+	int num = atoi(l->YYText());
+	return new Integer(num);
+}
 
 int main(void)
 {
 	FlexLexer *lexer = new yyFlexLexer;
-	do
-	{
-		token = lexer->yylex();
-		cout << "Line: " << lexer->lineno() << " token: " << token << endl;
-		// errrr ... F(c) ? .. svo T(c) ? svo hums
-	}
-	while(token != 0);
+	token = lexer->yylex();
 }
