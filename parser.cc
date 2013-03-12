@@ -85,11 +85,12 @@ T -> tala | '(' F ')'
 */
 Binary *parseBinOp(FlexLexer *l);
 
-Integer *parseTerm(FlexLexer *l)
+Expression *parseTerm(FlexLexer *l)
 {
 	int token = l->yylex();
 	if (token == INT)
 	{
+		cout << "Returning new Integer(" << l->YYText() << ")" << endl;
 		int num = atoi(l->YYText());
 		return new Integer(num);
 	}
@@ -107,11 +108,12 @@ Integer *parseTerm(FlexLexer *l)
 		sprintf(err, "Expected RPAREN, got: %d (%s)\n\0", token, l->YYText());
 		error(err);
 	}
+	return op;
 }
 
 Binary *parseBinOp(FlexLexer *l)
 {
-	Integer *a = parseTerm(l);
+	Expression *a = parseTerm(l);
 	int token = l->yylex();
 	if (token != OP)
 	{
@@ -122,7 +124,7 @@ Binary *parseBinOp(FlexLexer *l)
 
 	char op = l->YYText()[0];
 
-	Integer *b = parseTerm(l);
+	Expression *b = parseTerm(l);
 
 	switch (op)
 	{
