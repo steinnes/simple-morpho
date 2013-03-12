@@ -1,0 +1,21 @@
+program		:	function ;
+
+function	: 	NAME '(' NAME ')'
+			'{' { decl ';' } { expr ';' } '}' ;
+
+
+decl		:	VAR NAME { ',' NAME } ;
+
+expr		:	NAME '=' expr 
+		| 	RETURN expr
+		|	NAME
+		|	VALUE
+		|	NAME '(' expr { ',' expr } ')'
+		|	OP expr
+		|	'[' expr { ',' expr } ']'
+		|	'(' expr ')'
+		|	IF expr body
+		|	WHILE expr body ;
+
+body		:	'{' { expr ';' } '}'
+		;
