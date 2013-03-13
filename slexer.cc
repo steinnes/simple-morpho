@@ -7,20 +7,21 @@ SLexer::SLexer()
 int SLexer::advance()
 {
 	if (PEEKED)
-	{
-		PEEKED = 0;
 		return last_tok;
-	}
 	return l->yylex();
 	
 }
-char *SLexer::text()
+void SLexer::over()
 {
-	if (PEEKED) { return last_str; }
-
-
 	if (last_str != NULL)
 		delete last_str; // free due to strdup
+	PEEKED = 0;
+}
+char *SLexer::text()
+{
+	if (PEEKED)
+		return last_str;
+
 	return (char *)l->YYText();
 }
 int SLexer::peek()
@@ -29,4 +30,9 @@ int SLexer::peek()
 	last_tok = l->yylex();
 	last_str = strdup(l->YYText());
 	return last_tok;
+}
+
+int SLexer::line()
+{
+	return l->lineno();
 }

@@ -16,6 +16,8 @@ public:
 	int advance();
 	char *text();
 	int peek();
+	int line();
+	void over();
 };
 
 #endif

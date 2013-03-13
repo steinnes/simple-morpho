@@ -116,16 +116,24 @@ Expression *parseTerm(SLexer *l)
 	return op;
 }
 
+// L -> T | T * T
 Expression *parseLumma(SLexer *l)
 {
-	int token = l->advance();
-	// þyrfti að peek-a hér..
-	
+	Expression *a = parseTerm(l);
+	int token = l->peek();
+	char op = l->text()[0];
+	if (token != OP || op != '*') return a;
+
+	l->over();
+	Expression *b = parseTerm(l);
+	return new Binary('*', a, b);
 }
 
+
+// F -> L | L + L | L - L
 Binary *parseFormula(SLexer *l)
 {
-	Expression *a = parseTerm(l);
+	Expression *a = parseLumma(l);
 	int token = l->advance();
 	if (token != OP)
 	{
@@ -136,7 +144,7 @@ Binary *parseFormula(SLexer *l)
 
 	char op = l->text()[0];
 
-	Expression *b = parseTerm(l);
+	Expression *b = parseLumma(l);
 
 	switch (op)
 	{

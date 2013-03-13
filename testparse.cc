@@ -1,18 +1,18 @@
 #include <ctype.h>
 #include <iostream>
 #include <stdlib.h>
-#include <FlexLexer.h>
+#include "slexer.h"
 
 using namespace std;
 int token;
 
 int main(void)
 {
-	FlexLexer *lexer = new yyFlexLexer;
+	SLexer *lexer = new SLexer();
 	do
 	{
-		token = lexer->yylex();
-		cout << "Line: " << lexer->lineno() << " token: " << token << " string: " << lexer->YYText() << endl;
+		token = lexer->advance();
+		cout << "Line: " << lexer->line() << " token: " << token << " string: " << lexer->text() << endl;
 		// errrr ... F(c) ? .. svo T(c) ? svo hums
 	}
 	while(token != 0);
