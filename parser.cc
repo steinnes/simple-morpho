@@ -90,7 +90,7 @@ L = parseLumma
 T = parseTerm
 
 */
-Binary *parseFormula(SLexer *l);
+Expression *parseFormula(SLexer *l);
 
 // T -> tala | '(' F ')'
 Expression *parseTerm(SLexer *l)
@@ -107,7 +107,7 @@ Expression *parseTerm(SLexer *l)
 		sprintf(err, "Expected LPAREN, got: %d (%s)\n\0", token, l->text());
 		error(err);
 	}
-	Binary *op = parseFormula(l);
+	Expression *op = parseFormula(l);
 	token = l->advance();
 	if (token != RPAREN)
 	{
@@ -136,20 +136,20 @@ Expression *parseLumma(SLexer *l)
 
 
 // F -> L | L + L | L - L
-Binary *parseFormula(SLexer *l)
+Expression *parseFormula(SLexer *l)
 {
 	Expression *a = parseLumma(l);
 	if (DEBUG) cout << "F .. a=" << a->compute() << endl;
 
-	int token = l->advance();
+	int token = l->peek();
 	if (token != OP)
 	{
-		char err[256];
-		sprintf(err, "Expected OP, got: %d (%s)\n\0", token, l->text());
-		error(err);
+		if (DEBUG) cout << "peeked token=" << token << " (" << l->text() << ")" << endl;
+		return a;
 	}
 
 	char op = l->text()[0];
+	l->over(); // burn off the peeked
 	if (DEBUG) cout << "F .. op=" << op << endl;
 
 	Expression *b = parseLumma(l);

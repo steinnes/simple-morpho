@@ -34,9 +34,12 @@ char *SLexer::text()
 }
 int SLexer::peek()
 {
-	PEEKED = 1;
-	last_tok = l->yylex();
-	last_str = strdup(l->YYText());
+	if (PEEKED == 0)
+	{
+		PEEKED = 1;
+		last_tok = l->yylex();
+		last_str = strdup(l->YYText());
+	}
 	return last_tok;
 }
 
