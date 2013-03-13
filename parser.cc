@@ -81,10 +81,6 @@ void error(char *errstr)
 
 /* grammar:
 
-F -> L
-L -> T | L * L
-T -> tala | T + T | T - T | '(' F ')'
-
 F -> L | L + L | L - L
 L -> T | T * T
 T -> tala | '(' F ')'
@@ -93,10 +89,10 @@ F = parseFormula
 L = parseLumma
 T = parseTerm
 
-
 */
 Binary *parseFormula(SLexer *l);
 
+// T -> tala | '(' F ')'
 Expression *parseTerm(SLexer *l)
 {
 	int token = l->advance();
