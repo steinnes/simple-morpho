@@ -9,6 +9,8 @@
 using namespace std;
 int token;
 
+int DEBUG = 1;
+
 class Expression
 {
 public:
@@ -79,6 +81,10 @@ void error(char *errstr)
 
 /* grammar:
 
+F -> L
+L -> T | L * L
+T -> tala | T + T | T - T | '(' F ')'
+
 F -> L | L + L | L - L
 L -> T | T * T
 T -> tala | '(' F ')'
@@ -122,9 +128,12 @@ Expression *parseLumma(SLexer *l)
 	Expression *a = parseTerm(l);
 	int token = l->peek();
 	char op = l->text()[0];
-	if (token != OP || op != '*') return a;
-
-	l->over();
+	if (token != OP || op != '*')
+	{
+		if (DEBUG) cout << "token != OP (" << token << ") op='" << op << "'" << endl;
+		return a;
+	}
+	l->over(); // burn off the peeked
 	Expression *b = parseTerm(l);
 	return new Binary('*', a, b);
 }
@@ -134,6 +143,8 @@ Expression *parseLumma(SLexer *l)
 Binary *parseFormula(SLexer *l)
 {
 	Expression *a = parseLumma(l);
+	if (DEBUG) cout << "F .. a=" << a->compute() << endl;
+
 	int token = l->advance();
 	if (token != OP)
 	{
@@ -143,8 +154,10 @@ Binary *parseFormula(SLexer *l)
 	}
 
 	char op = l->text()[0];
+	if (DEBUG) cout << "F .. op=" << op << endl;
 
 	Expression *b = parseLumma(l);
+	if (DEBUG) cout << "F .. b=" << b->compute() << endl;
 
 	switch (op)
 	{
