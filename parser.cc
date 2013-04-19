@@ -9,7 +9,7 @@
 using namespace std;
 int token;
 
-int DEBUG = 1;
+int DEBUG = 0;
 
 class Expression
 {
@@ -81,19 +81,23 @@ void error(char *errstr)
 
 /* grammar:
 
-F -> L | L + L | L - L
-L -> T | T * T
-T -> tala | '(' F ')'
-
-F = parseFormula
-L = parseLumma
-T = parseTerm
+F -> L Fx
+Fx -> + L Fx
+Fx -> - L Fx
+Fx -> eps
+L -> T Lx
+Lx -> * T Lx
+Lx -> eps
+T -> tala 
+T ->'(' F ')'
 
 */
-Expression *parseFormula(SLexer *l);
+Expression *F(SLexer *l);
 
-// T -> tala | '(' F ')'
-Expression *parseTerm(SLexer *l)
+
+// T -> tala 
+// T -> '(' F ')'
+Expression *T(SLexer *l)
 {
 	int token = l->advance();
 	if (token == INT)
@@ -107,7 +111,7 @@ Expression *parseTerm(SLexer *l)
 		sprintf(err, "Expected LPAREN, got: %d (%s)\n\0", token, l->text());
 		error(err);
 	}
-	Expression *op = parseFormula(l);
+	Expression *op = F(l);
 	token = l->advance();
 	if (token != RPAREN)
 	{
@@ -118,28 +122,61 @@ Expression *parseTerm(SLexer *l)
 	return op;
 }
 
-// L -> T | T * T
-Expression *parseLumma(SLexer *l)
+// Lx -> * T Lx
+// Lx -> eps
+Expression *Lx(SLexer *l)
 {
-	Expression *a = parseTerm(l);
 	int token = l->peek();
+	if (token != OP)
+	{
+		if (DEBUG) cout << "Lx() -> got token=" << token << " (" << l->text() << ")" << endl;
+		return T(l);
+	}
+	
+}
+
+// L -> T Lx
+Expression *L(SLexer *l)
+{
+	Expression *a = T(l);
+	int token = l->peek();
+	if (token != OP)
+		return a;
+
 	char op = l->text()[0];
-	if (token != OP || op != '*')
+	if (op != '*')
 	{
 		if (DEBUG) cout << "token != OP (" << token << ") op='" << op << "'" << endl;
 		return a;
 	}
-	l->over(); // burn off the peeked
-	Expression *b = parseTerm(l);
-	return new Binary('*', a, b);
+	l->over(); // burn off the peeked op
+	return new Binary('*', a, Lx(l));
+}
+
+// Fx -> + L Fx
+// Fx -> - L Fx
+// Fx -> eps
+Expression *Fx(SLexer *l)
+{
+	Expression *a = L(l);
+
+	int token = l->peek();
+	if (token != OP)
+		return a;
+	char op = l->text()[0];
+	if (op=='+'||op=='-')
+	{
+		l->over(); // burn off peeked op
+		return new Binary(op, a, Fx(l));
+	}
+	return NULL;
 }
 
 
-// F -> L | L + L | L - L
-Expression *parseFormula(SLexer *l)
+// F -> L Fx
+Expression *F(SLexer *l)
 {
-	Expression *a = parseLumma(l);
-	if (DEBUG) cout << "F .. a=" << a->compute() << endl;
+	Expression *a = L(l); // L
 
 	int token = l->peek();
 	if (token != OP)
@@ -148,11 +185,12 @@ Expression *parseFormula(SLexer *l)
 		return a;
 	}
 
+	
 	char op = l->text()[0];
-	l->over(); // burn off the peeked
+	l->over(); // burn off the peeked token, we have it in "op"
 	if (DEBUG) cout << "F .. op=" << op << endl;
 
-	Expression *b = parseLumma(l);
+	Expression *b = Fx(l); // Fx
 	if (DEBUG) cout << "F .. b=" << b->compute() << endl;
 
 	switch (op)
@@ -173,6 +211,6 @@ Expression *parseFormula(SLexer *l)
 int main(void)
 {
 	SLexer *lexer = new SLexer;
-	Expression *e = parseFormula(lexer);
+	Expression *e = F(lexer);
 	cout << e->compute() << endl;
 }
