@@ -17,6 +17,10 @@
 
 #define ID         18
 
+#define OR         19
+#define AND        20
+#define NOT        21
+
 
 
 #define SEMICOLON  5

@@ -71,6 +71,32 @@ public:
 	EBinOp(string &o, Expression *ae, Expression *be) : op(o), a(ae), b(be) {};
 };
 
+class EOr : public Expression
+{
+private:
+	Expression *a;
+	Expression *b;
+public:
+	EOr(Expression *ae, Expression *be) : a(ae), b(be) {};
+};
+
+class EAnd : public Expression
+{
+private:
+	Expression *a;
+	Expression *b;
+public:
+	EAnd(Expression *ae, Expression *be) : a(ae), b(be) {};
+};
+
+class ENot : public Expression
+{
+private:
+	Expression *e;
+public:
+	ENot(Expression *expr) : e(expr) { };
+};
+
 void error(char *errstr)
 {
 	cerr << errstr << endl;
@@ -84,6 +110,9 @@ void printToken(Token t)
 
 ExprList *body(SLexer *);
 Expression *expr(SLexer *);
+Expression *or_expr(SLexer *);
+Expression *and_expr(SLexer *);
+Expression *not_expr(SLexer *);
 
 Expression *small_expr(SLexer *l)
 {
@@ -194,8 +223,45 @@ Expression *binop_expr(SLexer *l, int p)
 
 Expression *expr(SLexer *l)
 {
+	Token t = l->peek();
+	// XXX: implement return?
+	// XXX: implement <id> = <expr>
+	return or_expr(l);
+}
+Expression *or_expr(SLexer *l)
+{
+	Expression *a = and_expr(l);
+	Token t = l->peek();
+	if (t.token == OR)
+	{
+		l->skip();
+		return new EOr(a, or_expr(l));
+	}
+	return a;
+}
+Expression *and_expr(SLexer *l)
+{
+	Expression *a = not_expr(l);
+	Token t = l->peek();
+	if (t.token == AND)
+	{
+		l->skip();
+		return new EAnd(a, and_expr(l));
+	}
+	return not_expr(l);
+}
+Expression *not_expr(SLexer *l)
+{
+	Token t = l->peek();
+	if (t.token == NOT)
+	{
+		l->skip();
+		return new ENot(not_expr(l));
+	}
 	return binop_expr(l, 1);
 }
+
+
 
 ExprList *body(SLexer *l)
 {

@@ -22,6 +22,10 @@ NEWLINE 	\r|\n|\r\n
 WHITESPACE      [\n\r\ \t\b\012]
 ID		[_a-zA-Z]+[a-zA-Z0-9_]*
 
+OR		"||"
+AND		"&&"
+NOT		"!"
+
 %%
 {INT} 		{ return(INT); }
 {FLOAT} 	{ return(FLOAT); }
@@ -29,6 +33,9 @@ ID		[_a-zA-Z]+[a-zA-Z0-9_]*
 {TRUE} 		{ return(TRUE); }
 {FALSE} 	{ return(FALSE); }
 {OP} 		{ return(OP); }
+{OR}		{ return(OR); }
+{AND}		{ return(AND); }
+{NOT}		{ return(NOT); }
 "if"		{ return(IF); }
 "while"		{ return(WHILE); }
 {NEWLINE} 	{ line++; }
@@ -40,7 +47,6 @@ ID		[_a-zA-Z]+[a-zA-Z0-9_]*
 "("		{ return(LPAREN); }
 ")"		{ return(RPAREN); }
 {ID}		{ return(ID); }
-
 %%
 
 
