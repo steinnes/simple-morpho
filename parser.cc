@@ -95,6 +95,7 @@ void body(SLexer *l)
 	while (!l->match(RBRACE))
 	{
 		expr(l);
+		l->over(SEMICOLON);
 	}
 	l->over(RBRACE);
 }
@@ -102,7 +103,14 @@ void body(SLexer *l)
 int main(void)
 {
 	SLexer *lexer = new SLexer;
-	body(lexer);
+	try
+	{
+		body(lexer);
+	}
+	catch (ParseError e)
+	{
+		cout << e.what() << endl;
+	}
 /*	Expression *e = F(lexer);
 	cout << e->compute() << endl;*/
 }

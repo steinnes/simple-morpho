@@ -1,5 +1,13 @@
 #include "slexer.h"
 #include <iostream>
+#include <sstream>
+
+template <class T> inline std::string to_string (const T& t)
+{
+	std::stringstream ss;
+	ss << t;
+	return ss.str();
+}
 
 extern int DEBUG;
 
@@ -35,7 +43,10 @@ bool SLexer::over(int token)
 		q.push(mkToken());
 	t = q.front();
 	if (t.token != token)
-		return false;
+	{
+		string errstr = "Invalid token! Expected: " + to_string(token);
+		throw ParseError(t, errstr.c_str());
+	}
 
 	q.pop();
 	return true;

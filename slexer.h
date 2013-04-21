@@ -4,6 +4,7 @@
 #include <FlexLexer.h>
 #include <string.h>
 #include <queue>
+#include <stdio.h>
 
 using namespace std;
 
@@ -13,6 +14,21 @@ typedef struct Token
 	int lineno;
 	char *lexeme;
 } Token;
+
+class ParseError : exception
+{
+private:
+	char buf[512];
+public:
+	ParseError(Token t, const char *msg)
+	{
+		sprintf(buf, "Parse Error: %s\n\tline %d, token %d, lexeme '%s'", msg, t.lineno, t.token, t.lexeme);
+	}
+	virtual const char* what() const throw()
+	{
+		return buf;
+	}
+};
 
 class SLexer
 {
