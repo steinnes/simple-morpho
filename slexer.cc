@@ -21,7 +21,7 @@ Token SLexer::mkToken()
 {
 	Token t;
 	t.token = l->yylex();
-	t.lexeme = (char *)l->YYText();
+	t.lexeme = l->YYText();
 	t.lineno = l->lineno();
 	return t;
 }

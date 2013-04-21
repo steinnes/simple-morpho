@@ -12,7 +12,7 @@ typedef struct Token
 {
 	int token;
 	int lineno;
-	char *lexeme;
+	string lexeme;
 } Token;
 
 class ParseError : public exception
@@ -23,7 +23,7 @@ public:
 	ParseError() { };
 	ParseError(Token t, const char *msg)
 	{
-		sprintf(buf, "Parse Error: %s\n\tline %d, token %d, lexeme '%s'", msg, t.lineno, t.token, t.lexeme);
+		sprintf(buf, "Parse Error: %s\n\tline %d, token %d, lexeme '%s'", msg, t.lineno, t.token, t.lexeme.c_str());
 	}
 	virtual const char* what() const throw()
 	{
