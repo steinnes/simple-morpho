@@ -65,8 +65,9 @@ bool SLexer::match(int token)
 
 Token SLexer::peek()
 {
-	Token t = mkToken();
-	q.push(t);
-	return t;
+	if (!q.size())
+		q.push(mkToken());
+
+	return q.front();
 }
 

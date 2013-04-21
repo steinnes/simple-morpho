@@ -54,6 +54,7 @@ void printToken(Token t)
 Expression *small_expr(SLexer *l)
 {
 	Token token = l->peek();
+	cout << "small_expr() .. peeked token = " << token.token <<  "("  << token.lexeme << ")" << endl;
 	switch (token.token)
 	{
 		case STRING:
@@ -62,14 +63,17 @@ Expression *small_expr(SLexer *l)
 		case FALSE:
 		case TRUE:
 			// expecting assignment ?
+			cout << "Returning new ELiteral(" << token.lexeme << ")" << endl;
 			return new ELiteral(token.lexeme);
 			break;
 		default:
 		break;
 	}
 
+/*
 	while (!l->match(SEMICOLON))
 		printToken(l->advance());
+*/
 }
 
 Expression *expr(SLexer *l)
