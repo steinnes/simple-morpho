@@ -15,6 +15,8 @@
 #define IF         16
 #define WHILE      17
 
+#define ID         18
+
 
 
 #define SEMICOLON  5

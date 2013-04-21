@@ -20,6 +20,7 @@ FALSE		"false"|"FALSE"
 OP 		[+\-\*]|"=="
 NEWLINE 	\r|\n|\r\n
 WHITESPACE      [\n\r\ \t\b\012]
+ID		[_a-zA-Z]+[a-zA-Z0-9_]*
 
 %%
 {INT} 		{ return(INT); }
@@ -38,6 +39,7 @@ WHITESPACE      [\n\r\ \t\b\012]
 ";"		{ return(SEMICOLON); }
 "("		{ return(LPAREN); }
 ")"		{ return(RPAREN); }
+{ID}		{ return(ID); }
 
 %%
 

@@ -15,11 +15,12 @@ typedef struct Token
 	char *lexeme;
 } Token;
 
-class ParseError : exception
+class ParseError : public exception
 {
-private:
+protected:
 	char buf[512];
 public:
+	ParseError() { };
 	ParseError(Token t, const char *msg)
 	{
 		sprintf(buf, "Parse Error: %s\n\tline %d, token %d, lexeme '%s'", msg, t.lineno, t.token, t.lexeme);
@@ -28,6 +29,15 @@ public:
 	{
 		return buf;
 	}
+};
+
+class OperatorError : public ParseError
+{
+public:
+	OperatorError(string msg)
+	{
+		sprintf(buf, "Operator Error: %s\n", msg.c_str());
+	};
 };
 
 class SLexer
