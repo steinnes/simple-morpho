@@ -18,13 +18,16 @@ NEWLINE 	\r|\n|\r\n
 WHITESPACE      [\n\r\ \t\b\012]
 
 %%
-{INT} 				{ return(INT); }
-{OP} 				{ return(OP); }
-{NEWLINE} 			{ line++; }
-{WHITESPACE} 			{ }  // skip whitespaces
-"{"|"}"|","|";"         return (int)yytext[0]; // delimiters
-"("				{ return(LPAREN); }
-")"				{ return(RPAREN); }
+{INT} 		{ return(INT); }
+{OP} 		{ return(OP); }
+{NEWLINE} 	{ line++; }
+{WHITESPACE} 	{ }  // skip whitespaces
+"{"		{ return(LBRACE); }
+"}"		{ return(RBRACE); }
+","		{ return(COMMA); }
+";"		{ return(SEMICOLON); }
+"("		{ return(LPAREN); }
+")"		{ return(RPAREN); }
 
 %%
 
