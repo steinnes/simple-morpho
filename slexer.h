@@ -41,6 +41,7 @@ public:
 	Token advance();
 	Token peek();
 	int line();
+	void skip();
 	bool over(int token);
 	bool match(int token);
 };

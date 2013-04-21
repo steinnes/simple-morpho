@@ -34,6 +34,24 @@ public:
 	ELiteral(char *value) : val(value) {}
 };
 
+class EIf : public Expression
+{
+private:
+	Expression *cnd;
+	ExprList *stmts;
+public:
+	EIf(Expression *e, ExprList *el) : cnd(e), stmts(el) { };
+};
+
+class EWhile : public Expression
+{
+private:
+	Expression *cnd;
+	ExprList *stmts;
+public:
+	EWhile(Expression *e, ExprList *el) : cnd(e), stmts(el) { };
+};
+
 void error(char *errstr)
 {
 	cerr << errstr << endl;
@@ -45,10 +63,16 @@ void printToken(Token t)
 	cout << "line: "<< t.lineno << " token: " << t.token << " (" << t.lexeme << ")" << endl;
 }
 
+ExprList *body(SLexer *);
+Expression *expr(SLexer *);
+
 Expression *small_expr(SLexer *l)
 {
 	Token token = l->peek();
 	cout << "small_expr() .. peeked token = " << token.token <<  "("  << token.lexeme << ")" << endl;
+
+	Expression *cnd;
+	ExprList *stmts;
 	switch (token.token)
 	{
 		case STRING:
@@ -58,10 +82,24 @@ Expression *small_expr(SLexer *l)
 		case TRUE:
 			// expecting assignment ?
 			cout << "Returning new ELiteral(" << token.lexeme << ")" << endl;
-			l->over(token.token); // XXX: rewrite and use "skip" function
+			l->skip();
 			return new ELiteral(token.lexeme);
 			break;
 		case IF:
+			l->skip();
+
+			l->over(LPAREN);
+			cnd = expr(l);
+			l->over(RPAREN);
+			stmts = body(l);
+			return new EIf(cnd, stmts);
+		case WHILE:
+			l->skip();
+			l->over(LPAREN);
+			cnd = expr(l);
+			l->over(RPAREN);
+			stmts = body(l);
+			return new EWhile(cnd, stmts);
 		default:
 		break;
 	}

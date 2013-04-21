@@ -36,6 +36,11 @@ Token SLexer::advance()
 	return mkToken();
 }
 
+void SLexer::skip()
+{
+	q.pop();
+}
+
 bool SLexer::over(int token)
 {
 	Token t;

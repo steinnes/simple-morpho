@@ -17,7 +17,7 @@ FLOAT 		[0-9]*\.[0-9]+
 STRING		\"[^"]*\"
 TRUE		"true"|"TRUE"
 FALSE		"false"|"FALSE"
-OP 		[+\-\*]
+OP 		[+\-\*]|"=="
 NEWLINE 	\r|\n|\r\n
 WHITESPACE      [\n\r\ \t\b\012]
 
