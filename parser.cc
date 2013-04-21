@@ -79,9 +79,30 @@ void error(char *errstr)
 	exit(1);
 }
 
+void printToken(Token t)
+{
+	cout << "line: "<< t.lineno << " token: " << t.token << " (" << t.lexeme << ")" << endl;
+}
+
+void expr(SLexer *l)
+{
+	printToken(l->advance());
+}
+
+void body(SLexer *l)
+{
+	l->over(LBRACE);
+	while (!l->match(RBRACE))
+	{
+		expr(l);
+	}
+	l->over(RBRACE);
+}
+
 int main(void)
 {
 	SLexer *lexer = new SLexer;
+	body(lexer);
 /*	Expression *e = F(lexer);
 	cout << e->compute() << endl;*/
 }
