@@ -15,48 +15,15 @@ class Expression
 {
 public:
 	virtual ~Expression() {}
-	virtual int compute() const=0;
-	virtual void print()=0;
 };
 
-class Binary : public Expression
+class ELiteral : public Expression
 {
 private:
-	char op;
-	Expression *left;
-	Expression *right;
-	Binary();
+	string val;
 public:
-	Binary(char op, Expression *left, Expression *right)
-	{
-		this->op = op;
-		this->left = left;
-		this->right = right;
-	}
-
-	int compute() const
-	{
-		switch(op)
-		{
-			case '*':
-				return left->compute() * right->compute();
-			case '-':
-				return left->compute() - right->compute();
-			case '+':
-				return left->compute() + right->compute();
-			default:
-				std::cout << "unknown op:" << op << std::endl;
-		}
-		return 0;
-	}
-	void print()
-	{
-		std::cout << "left=";
-		left->print();
-		std::cout << "op=" << op << " right=";
-		right->print();
-		std::cout << std::endl;
-	}
+	ELiteral(string &value) : val(value) {};
+	ELiteral(char *value) : val(value) {}
 };
 
 class Integer : public Expression
@@ -84,9 +51,30 @@ void printToken(Token t)
 	cout << "line: "<< t.lineno << " token: " << t.token << " (" << t.lexeme << ")" << endl;
 }
 
-void expr(SLexer *l)
+Expression *small_expr(SLexer *l)
 {
-	printToken(l->advance());
+	Token token = l->peek();
+	switch (token.token)
+	{
+		case STRING:
+		case FLOAT:
+		case INT:
+		case FALSE:
+		case TRUE:
+			// expecting assignment ?
+			return new ELiteral(token.lexeme);
+			break;
+		default:
+		break;
+	}
+
+	while (!l->match(SEMICOLON))
+		printToken(l->advance());
+}
+
+Expression *expr(SLexer *l)
+{
+	return small_expr(l);
 }
 
 void body(SLexer *l)

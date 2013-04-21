@@ -12,13 +12,21 @@ int line = 1;
 %option noyywrap
 %option yylineno
 
-INT 		[0-9\.]+
+INT 		[0-9]+
+FLOAT 		[0-9]*\.[0-9]+
+STRING		\"[^"]*\"
+TRUE		"true"|"TRUE"
+FALSE		"false"|"FALSE"
 OP 		[+\-\*]
 NEWLINE 	\r|\n|\r\n
 WHITESPACE      [\n\r\ \t\b\012]
 
 %%
 {INT} 		{ return(INT); }
+{FLOAT} 	{ return(FLOAT); }
+{STRING} 	{ return(STRING); }
+{TRUE} 		{ return(TRUE); }
+{FALSE} 	{ return(FALSE); }
 {OP} 		{ return(OP); }
 {NEWLINE} 	{ line++; }
 {WHITESPACE} 	{ }  // skip whitespaces

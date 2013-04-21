@@ -5,6 +5,15 @@
 #define OP         2
 #define INT        3
 #define VAR    	   4
+
+#define TRUE       11
+#define FALSE      12
+#define FLOAT      13
+#define STRING     14
+#define ENULL      15
+
+
+
 #define SEMICOLON  5
 
 #define LPAREN     6
