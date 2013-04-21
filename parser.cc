@@ -165,11 +165,9 @@ Expression *binop_expr(SLexer *l, int p)
 	expr = binop_expr(l, p+1);
 	if (!l->match(OP))
 		return expr;
-	else
-	{
-		t = l->advance();
-		opname = t.lexeme;
-	}
+
+	t = l->advance();
+	opname = t.lexeme;
 
 	if (priority(opname) == p)
 		return expr;
@@ -180,12 +178,13 @@ Expression *binop_expr(SLexer *l, int p)
 	{
 		expr = new EBinOp(opname, expr, binop_expr(l, p+1));
 		if (!l->match(OP))
-			return expr;
-		else
 		{
-			t = l->advance();
-			opname = t.lexeme;
+			cout << "binop_expr() returning expression, op=" << opname << endl;
+			return expr;
 		}
+
+		t = l->advance();
+		opname = t.lexeme;
 
 		if (priority(opname) == p)
 			return expr;

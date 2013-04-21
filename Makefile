@@ -1,3 +1,4 @@
+FLAGS = -O0 -ggdb3
 
 all: parser
 tester: tokensyy.o testparse.o slexer.o
@@ -6,7 +7,7 @@ parser: tokensyy.o parser.o slexer.o
 	g++ tokensyy.o parser.o slexer.o -lfl -o parser
 
 .cc.o:
-	g++ -ggdb -c $*.cc
+	g++ $(FLAGS) -c $*.cc
 
 tokensyy.cc: tokens.l
 	flex++ -o tokensyy.cc tokens.l
