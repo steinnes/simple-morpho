@@ -3,21 +3,30 @@
 
 #include <FlexLexer.h>
 #include <string.h>
+#include <queue>
+
+using namespace std;
+
+typedef struct Token
+{
+	int token;
+	int lineno;
+	char *lexeme;
+} Token;
 
 class SLexer
 {
 private:
 	FlexLexer *l;
-	char *last_str;
-	int last_tok;
-	int PEEKED;
+	queue<struct Token> q;
+	Token mkToken();
 public:
 	SLexer();
-	int advance();
-	char *text();
-	int peek();
+	Token advance();
+	Token peek();
 	int line();
-	void over();
+	bool over(int token);
+	bool match(int token);
 };
 
 #endif

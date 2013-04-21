@@ -6,44 +6,56 @@ extern int DEBUG;
 SLexer::SLexer()
 {
 	l = new yyFlexLexer();
-}
-int SLexer::advance()
-{
-	if (PEEKED)
-	{
-		over();
-		return last_tok;
-	}
-	return l->yylex();
-	
-}
-void SLexer::over()
-{
-	if (DEBUG)
-		std::cout << "over() .. setting PEEKED to 0 .. last_str was:" << last_str << std::endl;
-	if (last_str != NULL)
-		delete last_str; // free due to strdup
-	PEEKED = 0;
-}
-char *SLexer::text()
-{
-	if (PEEKED)
-		return last_str;
-
-	return (char *)l->YYText();
-}
-int SLexer::peek()
-{
-	if (PEEKED == 0)
-	{
-		PEEKED = 1;
-		last_tok = l->yylex();
-		last_str = strdup(l->YYText());
-	}
-	return last_tok;
+	q = std::queue<Token>();
 }
 
-int SLexer::line()
+Token SLexer::mkToken()
 {
-	return l->lineno();
+	Token t;
+	t.token = l->yylex();
+	t.lexeme = (char *)l->YYText();
+	t.lineno = l->lineno();
+	return t;
 }
+Token SLexer::advance()
+{
+	if (q.size())
+	{
+		Token t = q.front();
+		q.pop();
+		return t;
+	}
+	return mkToken();
+}
+
+bool SLexer::over(int token)
+{
+	Token t;
+	if (!q.size())
+		q.push(mkToken());
+	t = q.front();
+	if (t.token != token)
+		return false;
+
+	q.pop();
+	return true;
+}
+
+bool SLexer::match(int token)
+{
+	Token t;
+	if (!q.size())
+		q.push(mkToken());
+	t = q.front();
+	if (t.token != token)
+		return false;
+	return true;
+}
+
+Token SLexer::peek()
+{
+	Token t = mkToken();
+	q.push(t);
+	return t;
+}
+
