@@ -28,6 +28,8 @@ WHITESPACE      [\n\r\ \t\b\012]
 {TRUE} 		{ return(TRUE); }
 {FALSE} 	{ return(FALSE); }
 {OP} 		{ return(OP); }
+"if"		{ return(IF); }
+"while"		{ return(WHILE); }
 {NEWLINE} 	{ line++; }
 {WHITESPACE} 	{ }  // skip whitespaces
 "{"		{ return(LBRACE); }

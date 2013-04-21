@@ -12,6 +12,9 @@
 #define STRING     14
 #define ENULL      15
 
+#define IF         16
+#define WHILE      17
+
 
 
 #define SEMICOLON  5

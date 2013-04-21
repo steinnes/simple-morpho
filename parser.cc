@@ -17,6 +17,14 @@ public:
 	virtual ~Expression() {}
 };
 
+class ExprList : public Expression
+{
+private:
+	std::vector<Expression *> expr_list;
+public:
+	void Add(Expression *e) { expr_list.push_back(e); };
+};
+
 class ELiteral : public Expression
 {
 private:
@@ -24,20 +32,6 @@ private:
 public:
 	ELiteral(string &value) : val(value) {};
 	ELiteral(char *value) : val(value) {}
-};
-
-class Integer : public Expression
-{
-private:
-	int val;
-	Integer();
-public:
-	Integer(int val)
-	{
-		this->val = val;
-	}
-	int compute() const { return val; }
-	void print()	{ std::cout << val; }
 };
 
 void error(char *errstr)
@@ -64,8 +58,10 @@ Expression *small_expr(SLexer *l)
 		case TRUE:
 			// expecting assignment ?
 			cout << "Returning new ELiteral(" << token.lexeme << ")" << endl;
+			l->over(token.token); // XXX: rewrite and use "skip" function
 			return new ELiteral(token.lexeme);
 			break;
+		case IF:
 		default:
 		break;
 	}
@@ -81,15 +77,17 @@ Expression *expr(SLexer *l)
 	return small_expr(l);
 }
 
-void body(SLexer *l)
+ExprList *body(SLexer *l)
 {
+	ExprList *el = new ExprList();
 	l->over(LBRACE);
 	while (!l->match(RBRACE))
 	{
-		expr(l);
+		el->Add(expr(l));
 		l->over(SEMICOLON);
 	}
 	l->over(RBRACE);
+	return el;
 }
 
 int main(void)
