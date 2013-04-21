@@ -31,7 +31,7 @@ private:
 	string val;
 public:
 	ELiteral(string &value) : val(value) {};
-	ELiteral(char *value) : val(value) {}
+	ELiteral(char *value) : val(value) {};
 };
 
 class EIf : public Expression
@@ -50,6 +50,25 @@ private:
 	ExprList *stmts;
 public:
 	EWhile(Expression *e, ExprList *el) : cnd(e), stmts(el) { };
+};
+
+class EVar : public Expression
+{
+private:
+	string name;
+public:
+        EVar(string &n) : name(n) {};
+        EVar(char *n) : name(n) {};
+};
+
+class EBinOp : public Expression
+{
+private:
+	Expression *a;
+	Expression *b;
+	string op;
+public:
+	EBinOp(string &o, Expression *ae, Expression *be) : op(o), a(ae), b(be) {};
 };
 
 void error(char *errstr)
@@ -87,7 +106,6 @@ Expression *small_expr(SLexer *l)
 			break;
 		case IF:
 			l->skip();
-
 			l->over(LPAREN);
 			cnd = expr(l);
 			l->over(RPAREN);
@@ -100,19 +118,84 @@ Expression *small_expr(SLexer *l)
 			l->over(RPAREN);
 			stmts = body(l);
 			return new EWhile(cnd, stmts);
+		case ID:
+			l->skip();
+			return new EVar(token.lexeme);
 		default:
 		break;
 	}
+}
 
-/*
-	while (!l->match(SEMICOLON))
-		printToken(l->advance());
-*/
+int priority(const string &s)
+{
+	switch (s[0])
+	{
+		case '?': return(1);
+		case '~': return(1);
+		case '^': return(1);
+		case ':': return(2);
+		case '|': return(3);
+		case '&': return(4);
+		case '=': return(5);
+		case '!': return(5);
+		case '>': return(5);
+		case '<': return(5);
+		case '+': return(6);
+		case '-': return(6);
+		case '*': return(7);
+		case '/': return(7);
+		case '%': return(7);
+	}
+	throw OperatorError("Unknown operator:" + s);
+}
+
+Expression *fun_expr(SLexer *l)
+{
+	return small_expr(l);
+}
+
+Expression *binop_expr(SLexer *l, int p)
+{
+	string opname;
+	Expression *expr;
+	Token t;
+	if (p == 8)
+		return fun_expr(l);
+
+	expr = binop_expr(l, p+1);
+	if (!l->match(OP))
+		return expr;
+	else
+	{
+		t = l->advance();
+		opname = t.lexeme;
+	}
+
+	if (priority(opname) == p)
+		return expr;
+	l->advance();
+
+	// XXX: sleppi if (p==2)
+	while (true)
+	{
+		expr = new EBinOp(opname, expr, binop_expr(l, p+1));
+		if (!l->match(OP))
+			return expr;
+		else
+		{
+			t = l->advance();
+			opname = t.lexeme;
+		}
+
+		if (priority(opname) == p)
+			return expr;
+		l->advance();
+	}
 }
 
 Expression *expr(SLexer *l)
 {
-	return small_expr(l);
+	return binop_expr(l, 1);
 }
 
 ExprList *body(SLexer *l)
