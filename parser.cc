@@ -1,8 +1,10 @@
 #include <ctype.h>
 #include <iostream>
+#include <fstream>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
+#include <map>
 #include "tokens.h"
 #include "slexer.h"
 
@@ -200,7 +202,7 @@ private:
 	string id;
 	Expression *value;
 public:
-	EAssign(string varname, Expression *e) : id(varname), value(e) { type = "EDeclAssign"; };
+	EAssign(string varname, Expression *e) : id(varname), value(e) { type = "EAssign"; };
 };
 
 void error(char *errstr)
@@ -383,11 +385,13 @@ ExprList *decls(SLexer *l)
 		if (decltok == VAL)
 		{
 			l->over(OP); // XXX: should be new token EQ ?
-			el->Add(new EAssign(t.lexeme, expr(l))); // XXX: ????
+			//el->Add(new EAssign(t.lexeme, expr(l))); // XXX: ????
+			//XXX: func->AddVar(t.lexeme, expr(l))
 		}
 		else if (decltok == VAR)
 		{
-			el->Add(new EDecl(t.lexeme));
+			//el->Add(new EDecl(t.lexeme));
+			//XXX: func->AddVar(t.lexeme, NULL)
 		}
 		else
 			throw ParseError(t, "Parsing declaration, expected VAR/VAL");
@@ -418,6 +422,21 @@ ExprList *body(SLexer *l)
 	return el;
 }
 
+void function(SLexer *l, ofstream &o)
+{
+	ExprList *el = body(l);
+	el->EmitAcc(o);
+}
+
+void program(SLexer *l, string progname)
+{
+	string fname = progname + ".masm";
+	ofstream fout (fname.c_str(), std::ofstream::out);
+	// XXX: hardcoding "main" .. we need a main ;-) .. no args either :-(
+	fout << "\"" << progname << ".mexe\" = main in" << endl << "!" << endl << "{{" << endl << "#\"main[f0]\" =" << endl << "[" << endl;
+	function(l, fout);
+	fout << "];" << endl << "}}" << "*" << endl << "BASIS" << endl << ";" << endl;
+}
 
 int main(void)
 {
@@ -425,11 +444,8 @@ int main(void)
 	acc = new Accounting();
 	try
 	{
-		// XXX: replace body() here with program()->function()->body()...
-		ExprList *el = body(lexer);
-		cout << "\"einfalt.mexe\" = main in" << endl << "!" << endl << "{{" << endl << "#\"main[f0]\" =" << endl << "[" << endl;
-		el->EmitAcc(cout);
-		cout << "];" << endl << "}}" << "*" << endl << "BASIS" << endl << ";" << endl;
+		// XXX: replace function() here with program()->function())...
+		program(lexer, "einfalt"); // XXX: hardcode einfalt, find from somewhere later?
 	}
 	catch (ParseError e)
 	{
