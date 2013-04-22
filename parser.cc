@@ -11,6 +11,42 @@ int token;
 
 int DEBUG = 1;
 
+
+// Bókhald fyrir hvert fall
+typedef struct Var
+{
+	int index;
+	string name;
+} Var;
+
+class Accounting
+{
+private:
+	int cur_index;
+	map<string, Var> vars;
+public:
+	Accounting()
+	{
+		cur_index = 0;
+	};
+	bool AddVar(string id)
+	{
+		if (vars.find(id) != vars.end())
+			return false;
+		Var x;
+		x.index = cur_index++;
+		x.name = id;
+		vars[id] = x;
+		return true;
+	};
+	Var GetVar(string id)
+	{
+		return vars[id];
+	};
+};
+
+Accounting *acc;
+
 class Expression
 {
 public:
@@ -39,6 +75,7 @@ public:
 			e->EmitAcc(o);
 		}
 	};
+
 };
 
 class ELiteral : public Expression
@@ -157,24 +194,14 @@ public:
 	};
 };
 
-// decls: ... XXX: should EDecl not exist, and use EVar instead?
-class EDecl : public Expression
-{
-private:
-	string id;
-public:
-	EDecl(string varname) : id(varname) { type = "EDecl"; };
-};
-
-class EDeclAssign : public Expression
+class EAssign : public Expression
 {
 private:
 	string id;
 	Expression *value;
 public:
-	EDeclAssign(string varname, Expression *e) : id(varname), value(e) { type = "EDeclAssign"; };
+	EAssign(string varname, Expression *e) : id(varname), value(e) { type = "EDeclAssign"; };
 };
-
 
 void error(char *errstr)
 {
@@ -356,7 +383,7 @@ ExprList *decls(SLexer *l)
 		if (decltok == VAL)
 		{
 			l->over(OP); // XXX: should be new token EQ ?
-			el->Add(new EDeclAssign(t.lexeme, expr(l))); // XXX: ????
+			el->Add(new EAssign(t.lexeme, expr(l))); // XXX: ????
 		}
 		else if (decltok == VAR)
 		{
@@ -391,11 +418,14 @@ ExprList *body(SLexer *l)
 	return el;
 }
 
+
 int main(void)
 {
 	SLexer *lexer = new SLexer;
+	acc = new Accounting();
 	try
 	{
+		// XXX: replace body() here with program()->function()->body()...
 		ExprList *el = body(lexer);
 		cout << "\"einfalt.mexe\" = main in" << endl << "!" << endl << "{{" << endl << "#\"main[f0]\" =" << endl << "[" << endl;
 		el->EmitAcc(cout);
