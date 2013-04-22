@@ -11,8 +11,9 @@ int main(void)
 	SLexer *lexer = new SLexer();
 	do
 	{
-		token = lexer->advance();
-		cout << "Line: " << lexer->line() << " token: " << token << " string: " << lexer->text() << endl;
+		Token t = lexer->advance();
+		token = t.token;
+		cout << "Line: " << t.lineno << " token: " << token << " string: '" << t.lexeme  << "'" << endl;
 		// errrr ... F(c) ? .. svo T(c) ? svo hums
 	}
 	while(token != 0);

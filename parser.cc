@@ -11,22 +11,33 @@ int token;
 
 int DEBUG = 0;
 
-
 class Expression
 {
 public:
-	virtual ~Expression() {}
+	string type;
+	virtual ~Expression() {};
+	virtual void EmitAcc(ostream&) {};
 };
 
 class ExprList : public Expression
 {
 public:
+	ExprList() { type = "ExprList"; }
 	vector<Expression *> expr_list;
-	void Add(Expression *e) { expr_list.push_back(e); };
-	void Add(ExprList *e) {
+	void Add(Expression *e) { if (DEBUG) { cerr << "Adding " << e->type << " to ExprList" << endl; } expr_list.push_back(e); };
+	void Add(ExprList *e)
+	{
 		vector<Expression *> el = e->expr_list;
 		for (vector<Expression *>::const_iterator it=el.begin(); it!=el.end(); it++)
 			expr_list.push_back(*it);
+	};
+	void EmitAcc(ostream &o)
+	{
+		for (vector<Expression *>::const_iterator it=expr_list.begin(); it != expr_list.end(); it++)
+		{
+			Expression *e = *it;
+			e->EmitAcc(o);
+		}
 	};
 };
 
@@ -37,6 +48,10 @@ private:
 public:
 	ELiteral(string &value) : val(value) {};
 	ELiteral(char *value) : val(value) {};
+	void EmitAcc(ostream &o)
+	{
+		o << "(MakeVal " << val << ")" << endl;
+	};
 };
 
 class EIf : public Expression
@@ -45,7 +60,7 @@ private:
 	Expression *cnd;
 	ExprList *stmts;
 public:
-	EIf(Expression *e, ExprList *el) : cnd(e), stmts(el) { };
+	EIf(Expression *e, ExprList *el) : cnd(e), stmts(el) { type = "EIf"; };
 };
 
 class EWhile : public Expression
@@ -54,7 +69,7 @@ private:
 	Expression *cnd;
 	ExprList *stmts;
 public:
-	EWhile(Expression *e, ExprList *el) : cnd(e), stmts(el) { };
+	EWhile(Expression *e, ExprList *el) : cnd(e), stmts(el) { type = "EWhile"; };
 };
 
 class EVar : public Expression
@@ -62,8 +77,8 @@ class EVar : public Expression
 private:
 	string name;
 public:
-        EVar(string &n) : name(n) {};
-        EVar(char *n) : name(n) {};
+        EVar(string &n) : name(n) { type = "EVar"; };
+        EVar(char *n) : name(n) { type = "EVar"; };
 };
 
 class EBinOp : public Expression
@@ -73,7 +88,7 @@ private:
 	Expression *b;
 	string op;
 public:
-	EBinOp(string &o, Expression *ae, Expression *be) : op(o), a(ae), b(be) {};
+	EBinOp(string &o, Expression *ae, Expression *be) : op(o), a(ae), b(be) { type = "EBinOp"; };
 };
 
 class EOr : public Expression
@@ -82,7 +97,7 @@ private:
 	Expression *a;
 	Expression *b;
 public:
-	EOr(Expression *ae, Expression *be) : a(ae), b(be) {};
+	EOr(Expression *ae, Expression *be) : a(ae), b(be) { type = "EOr"; };
 };
 
 class EAnd : public Expression
@@ -91,7 +106,7 @@ private:
 	Expression *a;
 	Expression *b;
 public:
-	EAnd(Expression *ae, Expression *be) : a(ae), b(be) {};
+	EAnd(Expression *ae, Expression *be) : a(ae), b(be) { type = "EAnd"; };
 };
 
 class ENot : public Expression
@@ -99,7 +114,7 @@ class ENot : public Expression
 private:
 	Expression *e;
 public:
-	ENot(Expression *expr) : e(expr) { };
+	ENot(Expression *expr) : e(expr) { type = "ENot"; };
 };
 
 class EReturn : public Expression
@@ -107,7 +122,7 @@ class EReturn : public Expression
 private:
 	Expression *e;
 public:
-	EReturn(Expression *expr) : e(expr) { };
+	EReturn(Expression *expr) : e(expr) { type = "EReturn"; };
 };
 
 // decls: ... XXX: should EDecl not exist, and use EVar instead?
@@ -116,7 +131,7 @@ class EDecl : public Expression
 private:
 	string id;
 public:
-	EDecl(string varname) : id(varname) {};
+	EDecl(string varname) : id(varname) { type = "EDecl"; };
 };
 
 class EDeclAssign : public Expression
@@ -125,7 +140,7 @@ private:
 	string id;
 	Expression *value;
 public:
-	EDeclAssign(string varname, Expression *e) : id(varname), value(e) {};
+	EDeclAssign(string varname, Expression *e) : id(varname), value(e) { type = "EDeclAssign"; };
 };
 
 
@@ -149,7 +164,7 @@ Expression *not_expr(SLexer *);
 Expression *small_expr(SLexer *l)
 {
 	Token token = l->peek();
-	cout << "small_expr() .. peeked token = " << token.token <<  "("  << token.lexeme << ")" << endl;
+	if (DEBUG) cerr << "small_expr() .. peeked token = " << token.token <<  "("  << token.lexeme << ")" << endl;
 
 	Expression *cnd;
 	ExprList *stmts;
@@ -161,9 +176,12 @@ Expression *small_expr(SLexer *l)
 		case FALSE:
 		case TRUE:
 			// expecting assignment ?
-			cout << "Returning new ELiteral(" << token.lexeme << ")" << endl;
+			if (DEBUG) cerr << "Returning new ELiteral(" << token.lexeme << ")" << endl;
 			l->skip();
-			return new ELiteral(token.lexeme);
+			Expression *e;
+			e = new ELiteral(token.lexeme);
+			if (DEBUG) fprintf(stderr, "About to return new ELiteral, address: %p\n", e);
+			return e;
 			break;
 		case IF:
 			l->skip();
@@ -225,7 +243,10 @@ Expression *binop_expr(SLexer *l, int p)
 
 	expr = binop_expr(l, p+1);
 	if (!l->match(OP))
+	{
+		if (DEBUG) fprintf(stderr, "binop_expr returning expr (%s), address: %p\n", expr->type.c_str(), expr);
 		return expr;
+	}
 
 	t = l->advance();
 	opname = t.lexeme;
@@ -240,7 +261,7 @@ Expression *binop_expr(SLexer *l, int p)
 		expr = new EBinOp(opname, expr, binop_expr(l, p+1));
 		if (!l->match(OP))
 		{
-			cout << "binop_expr() returning expression, op=" << opname << endl;
+			if (DEBUG) cerr << "binop_expr() returning expression, op=" << opname << endl;
 			return expr;
 		}
 
@@ -284,7 +305,7 @@ Expression *and_expr(SLexer *l)
 		l->skip();
 		return new EAnd(a, and_expr(l));
 	}
-	return not_expr(l);
+	return a;
 }
 Expression *not_expr(SLexer *l)
 {
@@ -297,6 +318,7 @@ Expression *not_expr(SLexer *l)
 	return binop_expr(l, 1);
 }
 
+// þetta fall er ekki rétt..
 ExprList *decls(SLexer *l)
 {
 	ExprList *el = new ExprList();
@@ -315,10 +337,13 @@ ExprList *decls(SLexer *l)
 		{
 			el->Add(new EDecl(t.lexeme));
 		}
+		else
+			throw ParseError(t, "Parsing declaration, expected VAR/VAL");
 		if (l->match(COMMA)) // XXX: messy?
 			l->skip();
 	}
-	throw ParseError(t, "Parsing declaration, expected VAR/VAL");
+	l->over(SEMICOLON);
+	return el;
 }
 
 
@@ -328,7 +353,9 @@ ExprList *body(SLexer *l)
 	l->over(LBRACE);
 
 	while (l->match(VAR) || l->match(VAL))
+	{
 		el->Add(decls(l));
+	}
 
 	while (!l->match(RBRACE))
 	{
@@ -344,7 +371,10 @@ int main(void)
 	SLexer *lexer = new SLexer;
 	try
 	{
-		body(lexer);
+		ExprList *el = body(lexer);
+		cout << "\"einfalt.mexe\" = main in" << endl << "!" << endl << "{{" << endl << "#\"main[f0]\" =" << endl << "[" << endl;
+		el->EmitAcc(cout);
+		cout << "];" << endl << "}}" << "*" << endl << "BASIS" << endl << ";" << endl;
 	}
 	catch (ParseError e)
 	{
