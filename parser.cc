@@ -139,6 +139,11 @@ private:
 	Expression *e;
 public:
 	EReturn(Expression *expr) : e(expr) { type = "EReturn"; };
+	void EmitAcc(ostream &o)
+	{
+		e->EmitAcc(o);
+		o << "(Return 0)" << endl;
+	};
 };
 
 // decls: ... XXX: should EDecl not exist, and use EVar instead?
