@@ -36,8 +36,11 @@ NOT		"!"
 {OR}		{ return(OR); }
 {AND}		{ return(AND); }
 {NOT}		{ return(NOT); }
+"val"		{ return(VAL); }
+"var"		{ return(VAR); }
 "if"		{ return(IF); }
 "while"		{ return(WHILE); }
+"return"	{ return(RETURN); }
 {NEWLINE} 	{ line++; }
 {WHITESPACE} 	{ }  // skip whitespaces
 "{"		{ return(LBRACE); }

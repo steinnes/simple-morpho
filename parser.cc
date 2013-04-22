@@ -11,6 +11,7 @@ int token;
 
 int DEBUG = 0;
 
+
 class Expression
 {
 public:
@@ -19,10 +20,14 @@ public:
 
 class ExprList : public Expression
 {
-private:
-	std::vector<Expression *> expr_list;
 public:
+	vector<Expression *> expr_list;
 	void Add(Expression *e) { expr_list.push_back(e); };
+	void Add(ExprList *e) {
+		vector<Expression *> el = e->expr_list;
+		for (vector<Expression *>::const_iterator it=el.begin(); it!=el.end(); it++)
+			expr_list.push_back(*it);
+	};
 };
 
 class ELiteral : public Expression
@@ -96,6 +101,33 @@ private:
 public:
 	ENot(Expression *expr) : e(expr) { };
 };
+
+class EReturn : public Expression
+{
+private:
+	Expression *e;
+public:
+	EReturn(Expression *expr) : e(expr) { };
+};
+
+// decls: ... XXX: should EDecl not exist, and use EVar instead?
+class EDecl : public Expression
+{
+private:
+	string id;
+public:
+	EDecl(string varname) : id(varname) {};
+};
+
+class EDeclAssign : public Expression
+{
+private:
+	string id;
+	Expression *value;
+public:
+	EDeclAssign(string varname, Expression *e) : id(varname), value(e) {};
+};
+
 
 void error(char *errstr)
 {
@@ -224,7 +256,11 @@ Expression *binop_expr(SLexer *l, int p)
 Expression *expr(SLexer *l)
 {
 	Token t = l->peek();
-	// XXX: implement return?
+	if (t.token == RETURN)
+	{
+		l->skip();
+		return new EReturn(expr(l));
+	}
 	// XXX: implement <id> = <expr>
 	return or_expr(l);
 }
@@ -261,12 +297,39 @@ Expression *not_expr(SLexer *l)
 	return binop_expr(l, 1);
 }
 
+ExprList *decls(SLexer *l)
+{
+	ExprList *el = new ExprList();
+	Token t = l->peek();
+	int decltok = t.token;
+	l->skip(); // skip over decltok
+	while (!l->match(SEMICOLON))
+	{
+		t = l->advance();
+		if (decltok == VAL)
+		{
+			l->over(OP); // XXX: should be new token EQ ?
+			el->Add(new EDeclAssign(t.lexeme, expr(l))); // XXX: ????
+		}
+		else if (decltok == VAR)
+		{
+			el->Add(new EDecl(t.lexeme));
+		}
+		if (l->match(COMMA)) // XXX: messy?
+			l->skip();
+	}
+	throw ParseError(t, "Parsing declaration, expected VAR/VAL");
+}
 
 
 ExprList *body(SLexer *l)
 {
 	ExprList *el = new ExprList();
 	l->over(LBRACE);
+
+	while (l->match(VAR) || l->match(VAL))
+		el->Add(decls(l));
+
 	while (!l->match(RBRACE))
 	{
 		el->Add(expr(l));

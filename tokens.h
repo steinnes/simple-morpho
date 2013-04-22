@@ -21,7 +21,8 @@
 #define AND        20
 #define NOT        21
 
-
+#define RETURN     22
+#define VAL        23
 
 #define SEMICOLON  5
 

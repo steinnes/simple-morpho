@@ -59,10 +59,7 @@ bool SLexer::over(int token)
 
 bool SLexer::match(int token)
 {
-	Token t;
-	if (!q.size())
-		q.push(mkToken());
-	t = q.front();
+	Token t = peek();
 	if (t.token != token)
 		return false;
 	return true;
