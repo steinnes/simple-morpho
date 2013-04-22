@@ -62,7 +62,7 @@ public:
 	EIf(Expression *e, ExprList *el) : cnd(e), stmts(el) { type = "EIf"; };
 	void EmitAcc(ostream &o)
 	{
-		// XXX: finna rétt label offsets ?
+		// XXX: finna rétt label offset?
 		int label_offset = 0;
 		cnd->EmitAcc(o);
 		o << "(GoFalse _" << label_offset << ")" << endl;
@@ -78,6 +78,17 @@ private:
 	ExprList *stmts;
 public:
 	EWhile(Expression *e, ExprList *el) : cnd(e), stmts(el) { type = "EWhile"; };
+	void EmitAcc(ostream &o)
+	{
+		// XXX: finna rétt label offset?
+		int label_offset = 0;
+		o << "_" << label_offset << ":" << endl;
+		cnd->EmitAcc(o);
+		o << "(GoFalse _" << label_offset+1 << ")" << endl;
+		stmts->EmitAcc(o);
+		o << "(Go _" << label_offset << ")" << endl;
+		o << "_" << label_offset+1 << ":" << endl;
+	};
 };
 
 class EVar : public Expression
