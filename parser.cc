@@ -9,7 +9,7 @@
 using namespace std;
 int token;
 
-int DEBUG = 0;
+int DEBUG = 1;
 
 class Expression
 {
@@ -43,11 +43,10 @@ public:
 
 class ELiteral : public Expression
 {
-private:
-	string val;
 public:
-	ELiteral(string &value) : val(value) {};
-	ELiteral(char *value) : val(value) {};
+	string val;
+	ELiteral(string &value) : val(value) { type = "ELiteral"; };
+	ELiteral(char *value) : val(value) { type = "ELiteral"; };
 	void EmitAcc(ostream &o)
 	{
 		o << "(MakeVal " << val << ")" << endl;
@@ -61,6 +60,15 @@ private:
 	ExprList *stmts;
 public:
 	EIf(Expression *e, ExprList *el) : cnd(e), stmts(el) { type = "EIf"; };
+	void EmitAcc(ostream &o)
+	{
+		// XXX: finna rétt label offsets ?
+		int label_offset = 0;
+		cnd->EmitAcc(o);
+		o << "(GoFalse _" << label_offset << ")" << endl;
+		stmts->EmitAcc(o);
+		o << "_" << label_offset << ":" << endl;
+	};
 };
 
 class EWhile : public Expression
@@ -89,6 +97,14 @@ private:
 	string op;
 public:
 	EBinOp(string &o, Expression *ae, Expression *be) : op(o), a(ae), b(be) { type = "EBinOp"; };
+	void EmitAcc(ostream &o)
+	{
+		a->EmitAcc(o);
+		o << "(StoreArgAcc -1 0)" << endl; // þurfum ekki að spá í -1 því við köllum strax í þetta?
+		b->EmitAcc(o);
+		o << "(StoreArgAcc -1 1)" << endl;
+		o << "(Call #\"" << op << "f[2]\" -1)" << endl;
+	};
 };
 
 class EOr : public Expression
@@ -178,9 +194,9 @@ Expression *small_expr(SLexer *l)
 			// expecting assignment ?
 			if (DEBUG) cerr << "Returning new ELiteral(" << token.lexeme << ")" << endl;
 			l->skip();
-			Expression *e;
+			ELiteral *e;
 			e = new ELiteral(token.lexeme);
-			if (DEBUG) fprintf(stderr, "About to return new ELiteral, address: %p\n", e);
+			if (DEBUG) fprintf(stderr, "About to return new ELiteral, address: %p val=%s\n", e, e->val.c_str());
 			return e;
 			break;
 		case IF:
@@ -240,15 +256,11 @@ Expression *binop_expr(SLexer *l, int p)
 	Token t;
 	if (p == 8)
 		return fun_expr(l);
-
 	expr = binop_expr(l, p+1);
 	if (!l->match(OP))
-	{
-		if (DEBUG) fprintf(stderr, "binop_expr returning expr (%s), address: %p\n", expr->type.c_str(), expr);
 		return expr;
-	}
 
-	t = l->advance();
+	t = l->peek();
 	opname = t.lexeme;
 
 	if (priority(opname) == p)
@@ -260,12 +272,9 @@ Expression *binop_expr(SLexer *l, int p)
 	{
 		expr = new EBinOp(opname, expr, binop_expr(l, p+1));
 		if (!l->match(OP))
-		{
-			if (DEBUG) cerr << "binop_expr() returning expression, op=" << opname << endl;
 			return expr;
-		}
 
-		t = l->advance();
+		t = l->peek();
 		opname = t.lexeme;
 
 		if (priority(opname) == p)

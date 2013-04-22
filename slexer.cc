@@ -27,13 +27,17 @@ Token SLexer::mkToken()
 }
 Token SLexer::advance()
 {
+	if (DEBUG) fprintf(stderr, "SLexer::advance():");
+	Token t;
 	if (q.size())
 	{
-		Token t = q.front();
+		t = q.front();
 		q.pop();
-		return t;
 	}
-	return mkToken();
+	else
+		t =mkToken();
+	if (DEBUG) fprintf(stderr, " %d %s\n", t.token, t.lexeme.c_str());
+	return t;
 }
 
 void SLexer::skip()
