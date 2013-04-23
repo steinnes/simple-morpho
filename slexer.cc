@@ -15,7 +15,6 @@ extern int DEBUG;
 SLexer::SLexer()
 {
 	l = new yyFlexLexer();
-	q = std::queue<Token>();
 }
 
 Token SLexer::mkToken()
@@ -33,7 +32,7 @@ Token SLexer::advance()
 	if (q.size())
 	{
 		t = q.front();
-		q.pop();
+		q.pop_front();
 	}
 	else
 		t =mkToken();
@@ -44,7 +43,7 @@ Token SLexer::advance()
 void SLexer::skip()
 {
 	if (q.size())
-		q.pop();
+		q.pop_front();
 	else
 		mkToken();
 }
@@ -53,7 +52,7 @@ bool SLexer::over(int token)
 {
 	Token t;
 	if (!q.size())
-		q.push(mkToken());
+		q.push_front(mkToken());
 	t = q.front();
 	if (t.token != token)
 	{
@@ -61,7 +60,7 @@ bool SLexer::over(int token)
 		throw ParseError(t, errstr.c_str());
 	}
 
-	q.pop();
+	q.pop_front();
 	return true;
 }
 
@@ -75,10 +74,20 @@ bool SLexer::match(int token)
 
 Token SLexer::peek()
 {
-	if (!q.size())
-		q.push(mkToken());
+	return peek(1);
+}
 
-	return q.front();
+Token SLexer::peek(int n)
+{
+	while (n > q.size())
+		q.push_front(mkToken());
+	Token t;
+	for (deque<Token>::iterator it=q.begin(); it != q.end(); it++)
+	{
+		if (--n == 0)
+			t = *it;
+	}
+	return t;
 }
 
 bool SLexer::eof()
