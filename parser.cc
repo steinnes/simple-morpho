@@ -146,7 +146,7 @@ Expression *binop_expr(SLexer *l, int p)
 
 Expression *expr(SLexer *l)
 {
-	Token t = l->peek();
+	Token t = l->peek(1);
 	if (t.token == RETURN)
 	{
 		l->skip();
@@ -154,14 +154,15 @@ Expression *expr(SLexer *l)
 	}
 	else if (t.token == ID)
 	{
-		l->skip();
-		// 1. finna id position í *acc
-		Var v = acc->GetVar(t.lexeme);
-		if (DEBUG) cerr << "expr(): found var assignment: " << t.lexeme << endl;
-		if (l->match(ASSIGN))
+		Token t2 = l->peek(2);
+		if (t2.token == ASSIGN)
 		{
+			// 1. finna id position í *acc
+			Var v = acc->GetVar(t.lexeme);
+			if (DEBUG) cerr << "expr(): found var assignment: " << t.lexeme << endl;
 			// 2. returna EAssign(position, <expr>);
-			l->over(ASSIGN);
+			l->skip();
+			l->skip();
 			if (DEBUG) cerr << "expr(): skipped over ASSIGN token, returning new EAssign(" << v.index << ", expr(l))" << endl;
 			return new EAssign(v.index, expr(l));
 		}
