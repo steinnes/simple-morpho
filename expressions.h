@@ -23,7 +23,7 @@ public:
 	void Add(Expression *e);
 	void Add(ExprList *e);
 	void EmitAcc(ostream &o);
-	void EmitArgs(ostream &o);
+	void EmitArgs(ostream &o, int AR);
 };
 
 class ELiteral : public Expression

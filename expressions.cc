@@ -25,13 +25,13 @@ void ExprList::EmitAcc(ostream &o)
 		e->EmitAcc(o);
 	}
 }
-void ExprList::EmitArgs(ostream &o)
+void ExprList::EmitArgs(ostream &o, int AR)
 {
 	int i = 0;
 	for (vector<Expression *>::const_iterator it=expr_list.begin(); it != expr_list.end(); it++)
 	{
 		Expression *e = *it;
-		e->EmitArg(o, acc->ar, i);
+		e->EmitArg(o, AR, i);
 		i++;
 	}
 }
@@ -67,9 +67,10 @@ void EWhile::EmitAcc(ostream &o)
 
 void ECall::EmitAcc(ostream &o)
 {
-	// XXX: mess with acc->ar ??
-	args->EmitArgs(o);
-	o << "(Call #\"" << function << "[f" << args->expr_list.size() << "]\" " << acc->ar << ")" << endl;
+	int AR = acc->ar;
+	acc->ar -= 1;
+	args->EmitArgs(o, AR);
+	o << "(Call #\"" << function << "[f" << args->expr_list.size() << "]\" " << AR << ")" << endl;
 }
 
 void EVar::EmitAcc(ostream &o)
@@ -80,11 +81,11 @@ void EVar::EmitAcc(ostream &o)
 
 void EBinOp::EmitAcc(ostream &o)
 {
-	a->EmitAcc(o);
-	o << "(StoreArgAcc -1 0)" << endl; // þurfum ekki að spá í -1 því við köllum strax í þetta?
-	b->EmitAcc(o);
-	o << "(StoreArgAcc -1 1)" << endl;
-	o << "(Call #\"" << op << "[f2]\" -1)" << endl;
+	int AR = acc->ar;
+	acc->ar -= 1;
+	a->EmitArg(o, AR, 0);
+	b->EmitArg(o, AR, 1);
+	o << "(Call #\"" << op << "[f2]\" " << AR << ")" << endl;
 }
 
 void EOr::EmitAcc(ostream &o) { }
