@@ -52,7 +52,7 @@ bool SLexer::over(int token)
 {
 	Token t;
 	if (!q.size())
-		q.push_front(mkToken());
+		q.push_back(mkToken());
 	t = q.front();
 	if (t.token != token)
 	{
@@ -80,7 +80,7 @@ Token SLexer::peek()
 Token SLexer::peek(int n)
 {
 	while (n > q.size())
-		q.push_front(mkToken());
+		q.push_back(mkToken());
 	Token t;
 	for (deque<Token>::iterator it=q.begin(); it != q.end(); it++)
 	{

@@ -75,7 +75,7 @@ Expression *small_expr(SLexer *l)
 		case ID:
 			// XXX: this should mean ID(...) => function call!?
 			l->skip();
-			cout << "Returning new EVar(" + token.lexeme + ")" << endl;
+			//cout << "Returning new EVar(" + token.lexeme + ")" << endl;
 			return new EVar(token.lexeme);
 		default:
 		break;
@@ -155,6 +155,11 @@ Expression *expr(SLexer *l)
 	else if (t.token == ID)
 	{
 		Token t2 = l->peek(2);
+		if (DEBUG)
+		{
+			cerr << "expr(): found ID" << endl;
+			cerr << t2.token << "( " << t2.lexeme << " )" << endl;
+		}
 		if (t2.token == ASSIGN)
 		{
 			// 1. finna id position í *acc
