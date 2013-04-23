@@ -77,3 +77,8 @@ Token SLexer::peek()
 	return q.front();
 }
 
+bool SLexer::eof()
+{
+	return (peek().token == 0);
+}
+

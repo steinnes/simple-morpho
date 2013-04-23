@@ -54,6 +54,7 @@ public:
 	void skip();
 	bool over(int token);
 	bool match(int token);
+	bool eof();
 };
 
 #endif

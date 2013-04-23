@@ -1,4 +1,5 @@
 #include <ctype.h>
+#include <assert.h>
 #include <iostream>
 #include <fstream>
 #include <stdio.h>
@@ -12,6 +13,15 @@ using namespace std;
 int token;
 
 int DEBUG = 1;
+int label_offset = 0;
+
+class Expression
+{
+public:
+	string type;
+	virtual ~Expression() {};
+	virtual void EmitAcc(ostream&) {};
+};
 
 
 // Bókhald fyrir hvert fall
@@ -19,6 +29,7 @@ typedef struct Var
 {
 	int index;
 	string name;
+	Expression *expr;
 } Var;
 
 class Accounting
@@ -31,13 +42,14 @@ public:
 	{
 		cur_index = 0;
 	};
-	bool AddVar(string id)
+	bool AddVar(string id, Expression *e)
 	{
 		if (vars.find(id) != vars.end())
 			return false;
 		Var x;
 		x.index = cur_index++;
 		x.name = id;
+		x.expr = e;
 		vars[id] = x;
 		return true;
 	};
@@ -45,17 +57,18 @@ public:
 	{
 		return vars[id];
 	};
+	~Accounting()
+	{
+		for (map<string, Var>::const_iterator it=vars.begin(); it != vars.end(); it++)
+		{
+			Expression *e = (Expression *)(it->second.expr);
+			if (e != NULL)
+				delete e;
+		}
+	};
 };
 
 Accounting *acc;
-
-class Expression
-{
-public:
-	string type;
-	virtual ~Expression() {};
-	virtual void EmitAcc(ostream&) {};
-};
 
 class ExprList : public Expression
 {
@@ -102,11 +115,12 @@ public:
 	void EmitAcc(ostream &o)
 	{
 		// XXX: finna rétt label offset?
-		int label_offset = 0;
 		cnd->EmitAcc(o);
-		o << "(GoFalse _" << label_offset << ")" << endl;
+		int my_label = label_offset;
+		label_offset += 1;
+		o << "(GoFalse _" << my_label << ")" << endl;
 		stmts->EmitAcc(o);
-		o << "_" << label_offset << ":" << endl;
+		o << "_" << my_label << ":" << endl;
 	};
 };
 
@@ -120,13 +134,14 @@ public:
 	void EmitAcc(ostream &o)
 	{
 		// XXX: finna rétt label offset?
-		int label_offset = 0;
-		o << "_" << label_offset << ":" << endl;
+		int my_label = label_offset;
+		label_offset += 2;
+		o << "_" << my_label << ":" << endl;
 		cnd->EmitAcc(o);
-		o << "(GoFalse _" << label_offset+1 << ")" << endl;
+		o << "(GoFalse _" << my_label+1 << ")" << endl;
 		stmts->EmitAcc(o);
-		o << "(Go _" << label_offset << ")" << endl;
-		o << "_" << label_offset+1 << ":" << endl;
+		o << "(Go _" << my_label << ")" << endl;
+		o << "_" << my_label+1 << ":" << endl;
 	};
 };
 
@@ -153,7 +168,7 @@ public:
 		o << "(StoreArgAcc -1 0)" << endl; // þurfum ekki að spá í -1 því við köllum strax í þetta?
 		b->EmitAcc(o);
 		o << "(StoreArgAcc -1 1)" << endl;
-		o << "(Call #\"" << op << "f[2]\" -1)" << endl;
+		o << "(Call #\"" << op << "[f2]\" -1)" << endl;
 	};
 };
 
@@ -259,8 +274,9 @@ Expression *small_expr(SLexer *l)
 			stmts = body(l);
 			return new EWhile(cnd, stmts);
 		case ID:
+			// XXX: this should mean ID(...) => function call!?
 			l->skip();
-			return new EVar(token.lexeme);
+			//return new EVar(token.lexeme);
 		default:
 		break;
 	}
@@ -376,32 +392,33 @@ Expression *not_expr(SLexer *l)
 ExprList *decls(SLexer *l)
 {
 	ExprList *el = new ExprList();
-	Token t = l->peek();
+	Token t = l->advance();
 	int decltok = t.token;
-	l->skip(); // skip over decltok
 	while (!l->match(SEMICOLON))
 	{
 		t = l->advance();
 		if (decltok == VAL)
 		{
-			l->over(OP); // XXX: should be new token EQ ?
-			//el->Add(new EAssign(t.lexeme, expr(l))); // XXX: ????
-			//XXX: func->AddVar(t.lexeme, expr(l))
+			string id = t.lexeme;
+			cout << "id=" << id << endl;;
+			assert(t.token == ID);
+			l->over(OP); // XXX: verify that the operator is "=" ?
+			if (!acc->AddVar(t.lexeme, expr(l)))
+				throw ParseError(t, "Variable already defined..");
 		}
 		else if (decltok == VAR)
 		{
 			//el->Add(new EDecl(t.lexeme));
-			//XXX: func->AddVar(t.lexeme, NULL)
+			acc->AddVar(t.lexeme, NULL);
 		}
 		else
 			throw ParseError(t, "Parsing declaration, expected VAR/VAL");
-		if (l->match(COMMA)) // XXX: messy?
+		if (l->match(COMMA))
 			l->skip();
 	}
 	l->over(SEMICOLON);
 	return el;
 }
-
 
 ExprList *body(SLexer *l)
 {
@@ -422,20 +439,46 @@ ExprList *body(SLexer *l)
 	return el;
 }
 
-void function(SLexer *l, ofstream &o)
+void function(SLexer *l, ostream &o)
 {
-	ExprList *el = body(l);
-	el->EmitAcc(o);
+	vector<string> args;
+	string funcid;
+	l->over(FUN);
+	if (l->match(ID))
+	{
+		Token t = l->advance();
+		funcid = t.lexeme;
+		// parse (id_list)
+		l->over(LPAREN);
+		while (!l->match(RPAREN))
+		{
+			Token t = l->advance();
+			if (t.token == ID)
+				args.push_back(t.lexeme);
+			else
+				throw ParseError(t, "Invalid function parameters, expected ID");
+			if (l->match(COMMA))
+				l->skip();
+		}
+		l->over(RPAREN);
+		o << "#\"" << funcid << "[f" << args.size() << "]\" =" << endl << "[" << endl;
+		ExprList *el = body(l);
+		el->EmitAcc(o);
+		o << "];" << endl;
+	}
 }
 
-void program(SLexer *l, string progname)
+void program(SLexer *l, ostream &o, string progname)
 {
-	string fname = progname + ".masm";
-	ofstream fout (fname.c_str(), std::ofstream::out);
-	// XXX: hardcoding "main" .. we need a main ;-) .. no args either :-(
-	fout << "\"" << progname << ".mexe\" = main in" << endl << "!" << endl << "{{" << endl << "#\"main[f0]\" =" << endl << "[" << endl;
-	function(l, fout);
-	fout << "];" << endl << "}}" << "*" << endl << "BASIS" << endl << ";" << endl;
+	// XXX: hardcoding "main" .. we need a main ;-)
+	o << "\"" << progname << ".mexe\" = main in" << endl << "!" << endl << "{{" << endl;
+	while (!l->eof())
+	{
+		acc = new Accounting(); // acc is our function var accounting object
+		function(l, o);
+		delete acc;
+	}
+	o << "}}" << "*" << endl << "BASIS" << endl << ";" << endl;
 }
 
 int main(void)
@@ -444,8 +487,10 @@ int main(void)
 	acc = new Accounting();
 	try
 	{
-		// XXX: replace function() here with program()->function())...
-		program(lexer, "einfalt"); // XXX: hardcode einfalt, find from somewhere later?
+		string progname = "einfalt"; // XXX: hardcode einfalt, find from somewhere later?
+		string fname = progname + ".masm";
+		//ofstream fout (fname.c_str(), std::ofstream::out);
+		program(lexer, cout, progname); 
 	}
 	catch (ParseError e)
 	{

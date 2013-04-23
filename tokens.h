@@ -23,6 +23,7 @@
 
 #define RETURN     22
 #define VAL        23
+#define FUN        24
 
 #define SEMICOLON  5
 

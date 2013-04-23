@@ -36,6 +36,7 @@ NOT		"!"
 {OR}		{ return(OR); }
 {AND}		{ return(AND); }
 {NOT}		{ return(NOT); }
+"fun"		{ return(FUN); }
 "val"		{ return(VAL); }
 "var"		{ return(VAR); }
 "if"		{ return(IF); }
