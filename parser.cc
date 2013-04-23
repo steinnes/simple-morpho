@@ -1,4 +1,5 @@
 #include <ctype.h>
+#include <unistd.h>
 #include <assert.h>
 #include <iostream>
 #include <fstream>
@@ -74,6 +75,7 @@ Expression *small_expr(SLexer *l)
 		case ID:
 			// XXX: this should mean ID(...) => function call!?
 			l->skip();
+			cout << "Returning new EVar(" + token.lexeme + ")" << endl;
 			return new EVar(token.lexeme);
 		default:
 		break;
@@ -152,13 +154,15 @@ Expression *expr(SLexer *l)
 	}
 	else if (t.token == ID)
 	{
+		l->skip();
 		// 1. finna id position í *acc
 		Var v = acc->GetVar(t.lexeme);
-		l->skip();
-		// 2. returna EAssign(position, <expr>);
+		if (DEBUG) cerr << "expr(): found var assignment: " << t.lexeme << endl;
 		if (l->match(ASSIGN))
 		{
-			l->over(ASSIGN); 
+			// 2. returna EAssign(position, <expr>);
+			l->over(ASSIGN);
+			if (DEBUG) cerr << "expr(): skipped over ASSIGN token, returning new EAssign(" << v.index << ", expr(l))" << endl;
 			return new EAssign(v.index, expr(l));
 		}
 	}
@@ -290,13 +294,28 @@ void program(SLexer *l, ostream &o, string progname)
 	o << "}}" << "*" << endl << "BASIS" << endl << ";" << endl;
 }
 
-int main(void)
+int main(int argc, char *argv[])
 {
+	int c;
+	string progname = "einfalt"; // some lame default value
+	while ((c = getopt(argc, argv, "o:d")) != -1)
+	{
+		switch (c)
+		{
+			case 'o': // -o specified, set progname
+				progname = optarg;
+			break;
+			case 'd':
+				DEBUG = 1;
+			break;
+			default:
+			break;
+		}
+	}
 	SLexer *lexer = new SLexer;
 	acc = new Accounting();
 	try
 	{
-		string progname = "einfalt"; // XXX: hardcode einfalt, find from somewhere later?
 		string fname = progname + ".masm";
 		//ofstream fout (fname.c_str(), std::ofstream::out);
 		program(lexer, cout, progname); 
