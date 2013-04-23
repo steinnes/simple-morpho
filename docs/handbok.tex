@@ -58,7 +58,7 @@ Notkun þýðandans er einföld, ef sótt er dreifiskrá SM: http://steinn.org/SM.tar.
 ~$ cd SM
 ~/SM$ make
 \end{verbatim}
-Ef engar villur koma fram við keyrslu "make", þá er SM þýðandinn þýddur. Til að nota hann fylgir með "compile" script sem tekur eitt viðfang: SM grunnkóða skrá. Lesið áfram í handbókinni fyrir nánari útlistun SM grunnkóðans, ásamt nokkrum dæmum í lokin. Fyrrnefnda "compile" scriptið býr til 2 skrár, ef allt gengur eftir: annars vegar .masm skrá sem inniheldur Morpho vélamál, og svo .mexe skrá sem er Morpho keyrsluskrá. Skrárnar bera sama grunnnafn og viðfangið við compile, dæmi:
+Ef engar villur koma fram við keyrslu "make", þá er SM þáttarinn þýddur. Til að nota hann fylgir með "compile" script sem tekur eitt viðfang: SM grunnkóða skrá. Lesið áfram í handbókinni fyrir nánari útlistun SM grunnkóðans, ásamt nokkrum dæmum í lokin. Fyrrnefnda "compile" scriptið býr til 2 skrár, ef allt gengur eftir: annars vegar .masm skrá sem inniheldur Morpho vélamál, og svo .mexe skrá sem er Morpho keyrsluskrá. Skrárnar bera sama grunnnafn og viðfangið við compile, dæmi:
 \begin{verbatim}
 ~/SM$ ./compile forrit.sm
 ~/SM$ ls -l forrit.masm
@@ -216,17 +216,18 @@ SM styður fjórar gerðir gilda, heiltölur ({\tt int}), fleytitölur ({\tt double})
 \subsection{Breytur}
 Breytur þarf að skilgreina fremst í stofni hvers falls. Það má gera á tvo vegu, annarsvegar með lykilorðinu {\tt var}, sem býst við lista af breytunöfnum án upphafsgilda, og hinsvegar með lykilorðinu {\tt val} sem býst við lista af breytunöfnum með jafntog ({\tt =}) merki á milli breytnafns og gildis. Ef um lista er að ræða skal aðskilja breytur eða gildisveitingasegðir með kommu ({\tt ,}).
 \subsubsection{Heiltölur}
-SM þýðandinn túlkar alla strengi sem innihalda ekkert nema stafi á bilinu 0-9 sem heiltöluri ({\tt int}).
+SM þáttarinn túlkar alla strengi sem innihalda ekkert nema stafi á bilinu 0-9 sem heiltöluri ({\tt int}).
 \subsubsection{Fleytitölur}
-SM þýðandinn túlkar alla strengi sem innihalda ekkert nema stafi á bilinu 0-9, með einum punkti ({\tt .}) einhversstaðar í strengnum sem fleytitölur ({\tt double}).
+SM þáttarinn túlkar alla strengi sem innihalda ekkert nema stafi á bilinu 0-9, með einum punkti ({\tt .}) einhversstaðar í strengnum sem fleytitölur ({\tt double}).
 \subsubsection{Strengir}
-SM þýðandinn túlkar alla strengi sem hefjast og enda á gæsalöppum ({\tt ``}) sem strengi ({\tt string}), og fær breytan þá gildi strengsins sem liggur á milli gæsalappanna.
+SM þáttarinn túlkar alla strengi sem hefjast og enda á gæsalöppum ({\tt ``}) sem strengi ({\tt string}), og fær breytan þá gildi strengsins sem liggur á milli gæsalappanna.
 \subsection{Merking segða}
 \subsubsection{Raungildasegðir}
 Í SM eru heiltölur, fleytitölur, strengir og sanngildi túlkuð sem sk. raungildi (e. \emph{literal}) og eiga að virka eins og í morpho.
 \subsubsection{Lista-segðir}
 Í SM eru ekki eiginlegar lista-segðir eins og í Morpho (enginn stuðningur við {\tt :} virkjann t.d.) en listar koma þó tvisvar fyrir í málfræðinni. Annars vegar sem viðfangslistar falla, bæði í skilgreiningu falls og í fallsköllum, og hinsvegar í breytuskilgreiningum eins og kemur fram hér að ofan. Í báðum tilfellum eru komma ({\tt ,}) notuð til að aðgreina stök í listanum.
 \subsubsection{return-segð}
+Return lykilorðið markar upphaf return-segðar sem endar keyrslu falls, þess vegna í miðjum stofni þess. Lykilorðið tekur við 
 \subsubsection{Röksegðir}
 \subsubsection{Kallsegð}
 \subsubsection{Tvíundaraðgerðir}
@@ -234,11 +235,4 @@ SM þýðandinn túlkar alla strengi sem hefjast og enda á gæsalöppum ({\tt ``}) sem
 SM styður eina einundaraðgerð, sem er neitunaraðgerð. Hún er táknuð í málinu með upphrópunarmerki ({\tt !})
 \subsubsection{if-segð}
 \subsubsection{while-segð}
-\section{LEYFAR FRÁ SNORRA-TEMPLATE}
-\subsection{Mállýsing með syntax pakkanum í LaTeX}
-\begin{grammar}
-<x> ::= <x> <y>
-	\alt <y> `x'
-\end{grammar}
-
 \end{document}
