@@ -12,7 +12,7 @@
 using namespace std;
 int token;
 
-int DEBUG = 1;
+int DEBUG = 0;
 int label_offset = 0;
 
 class Expression
@@ -214,10 +214,10 @@ public:
 class EAssign : public Expression
 {
 private:
-	string id;
+	int index;
 	Expression *value;
 public:
-	EAssign(string varname, Expression *e) : id(varname), value(e) { type = "EAssign"; };
+	EAssign(int idx, Expression *e) : index(idx), value(e) { type = "EAssign"; };
 };
 
 void error(char *errstr)
@@ -352,7 +352,14 @@ Expression *expr(SLexer *l)
 		l->skip();
 		return new EReturn(expr(l));
 	}
-	// XXX: implement <id> = <expr>
+	else if (t.token == ID)
+	{
+		// 1. finna id position í *acc
+		Var v = acc->GetVar(t.lexeme);
+		// 2. returna EAssign(position, <expr>);
+		l->over(OP); // XXX: OP = "=" ??
+		return new EAssign(v.index, expr(l));
+	}
 	return or_expr(l);
 }
 Expression *or_expr(SLexer *l)
@@ -400,7 +407,6 @@ ExprList *decls(SLexer *l)
 		if (decltok == VAL)
 		{
 			string id = t.lexeme;
-			cout << "id=" << id << endl;;
 			assert(t.token == ID);
 			l->over(OP); // XXX: verify that the operator is "=" ?
 			if (!acc->AddVar(t.lexeme, expr(l)))
