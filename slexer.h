@@ -15,17 +15,16 @@ typedef struct Token
 	string lexeme;
 } Token;
 
-
-
 class SLexer
 {
 private:
 	FlexLexer *l;
-	queue<struct Token> q;
+	deque<struct Token> q;
 	Token mkToken();
 public:
 	SLexer();
 	Token advance();
+	Token peek(int);
 	Token peek();
 	int line();
 	void skip();
