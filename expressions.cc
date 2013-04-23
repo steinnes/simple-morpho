@@ -4,6 +4,12 @@ extern int DEBUG;
 extern int label_offset;
 extern Accounting *acc;
 
+void Expression::EmitArg(ostream &o, int ar, int varpos)
+{
+	EmitAcc(o);
+	o << "(StoreArgAcc " << ar << " " << varpos << ")" << endl;
+}
+
 void ExprList::Add(Expression *e) { if (DEBUG) { cerr << "Adding " << e->type << " to ExprList" << endl; } expr_list.push_back(e); }
 void ExprList::Add(ExprList *e)
 {
@@ -19,7 +25,16 @@ void ExprList::EmitAcc(ostream &o)
 		e->EmitAcc(o);
 	}
 }
-
+void ExprList::EmitArgs(ostream &o)
+{
+	int i = 0;
+	for (vector<Expression *>::const_iterator it=expr_list.begin(); it != expr_list.end(); it++)
+	{
+		Expression *e = *it;
+		e->EmitArg(o, acc->ar, i);
+		i++;
+	}
+}
 
 void ELiteral::EmitAcc(ostream &o)
 {
@@ -52,6 +67,9 @@ void EWhile::EmitAcc(ostream &o)
 
 void ECall::EmitAcc(ostream &o)
 {
+	// XXX: mess with acc->ar ??
+	args->EmitArgs(o);
+	o << "(Call #\"" << function << "[f" << args->expr_list.size() << "]\" " << acc->ar << ")" << endl;
 }
 
 void EVar::EmitAcc(ostream &o)

@@ -12,6 +12,7 @@ public:
 	string type;
 	virtual ~Expression() {};
 	virtual void EmitAcc(ostream &o) = 0;
+	virtual void EmitArg(ostream &o, int ar, int varpos);
 };
 
 class ExprList : public Expression
@@ -22,6 +23,7 @@ public:
 	void Add(Expression *e);
 	void Add(ExprList *e);
 	void EmitAcc(ostream &o);
+	void EmitArgs(ostream &o);
 };
 
 class ELiteral : public Expression
@@ -57,7 +59,9 @@ class ECall : public Expression
 {
 private:
 	string function;
+	ExprList *args;
 public:
+	ECall(string id, ExprList *el) : function(id), args(el) {};
 	void EmitAcc(ostream &o);
 };
 

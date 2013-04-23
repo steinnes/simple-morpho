@@ -107,6 +107,25 @@ int priority(const string &s)
 
 Expression *fun_expr(SLexer *l)
 {
+	Token t = l->peek();
+	if (t.token == ID)
+	{
+		Token t2 = l->peek(2);
+		if (t2.token == LPAREN)
+		{
+			ExprList *el = new ExprList();
+			l->skip(); // skip over ID
+			l->skip(); // skip over LPAREN
+			while (!l->match(RPAREN))
+			{
+				el->Add(expr(l));
+				if (l->match(COMMA))
+					l->skip();
+			}
+			l->over(RPAREN);
+			return new ECall(t.lexeme, el);
+		}
+	}
 	return small_expr(l);
 }
 
@@ -218,7 +237,7 @@ void *decls(SLexer *l)
 		assert(t.token == ID);
 		if (decltok == VAL)
 		{
-			l->over(OP);
+			l->over(ASSIGN);
 			if (!acc->AddVar(t.lexeme, expr(l)))
 				throw ParseError(t, "Variable already defined..");
 		}
