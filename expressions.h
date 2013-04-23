@@ -11,7 +11,7 @@ class Expression
 public:
 	string type;
 	virtual ~Expression() {};
-	virtual void EmitAcc(ostream &o);
+	virtual void EmitAcc(ostream &o) = 0;
 };
 
 class ExprList : public Expression
