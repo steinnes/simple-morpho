@@ -24,6 +24,7 @@
 #define RETURN     22
 #define VAL        23
 #define FUN        24
+#define ASSIGN     25
 
 #define SEMICOLON  5
 

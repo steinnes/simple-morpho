@@ -1,6 +1,7 @@
-#include "slexer.h"
 #include <iostream>
 #include <sstream>
+#include "slexer.h"
+#include "errors.h"
 
 template <class T> inline std::string to_string (const T& t)
 {
