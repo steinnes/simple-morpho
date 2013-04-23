@@ -1,0 +1,246 @@
+%%
+%%  Beinagrind fyrir Morpho handbók í LaTeX.
+%%  Til að keyra þetta gegnum LaTeX forritið
+%%  má t.d. nota pdflatex í cygwin með eftir-
+%%  farandi skipun í bash:
+%%
+%%       pdflatex handbok
+%%   eða (virkar líka í cmd):
+%%       bash -c 'pdflatex handbok'
+%%
+\documentclass[12pt,a4paper]{article}
+\usepackage[icelandic]{babel}
+\usepackage[pdftex]{hyperref}
+%\usepackage{makeidx,smplindx,fancyhdr,graphicx,times,multicol,comment}
+\usepackage{times}
+\usepackage[T1]{fontenc}
+\usepackage[rounded]{syntax}
+\newenvironment{repnull}[0]{%
+	\begin{stack}
+	\\
+	\begin{rep}
+}{%
+	\end{rep}
+	\end{stack}
+}
+\newenvironment{málrit}[1]{%
+	\par\noindent\begin{minipage}{\linewidth}\vspace{0.5em}\begin{quote}\noindent%
+	\hspace*{-2em}\synt{#1}:\hfill\par%
+	\noindent%
+	\begin{minipage}{\linewidth}\begin{syntdiag}%
+}{%
+	\end{syntdiag}\end{minipage}\end{quote}\end{minipage}%
+}
+
+\begin{document}
+\sloppy
+\title{Handbók fyrir SM}
+\author{Steinn Eldjárn Sigurðarson <ses@hi.is>}
+\maketitle
+
+\begin{abstract}
+SM er einfalt forritunarmál og þýðandi. Þetta er handbók þess.
+\end{abstract}
+
+\tableofcontents
+
+\section{Inngangur}
+SM gæti staðið fyrir "Steins Morpho", eða "Simple Morpho", en þar sem að málið styður aðeins afar takmarkað hlutmengi Morpho segða, þá telur höfundur best að halda sig bara við SM. Þá nefnum við engin nöfn.
+
+SM fæðist sem verkefni í námskeiðinu Þýðendur við Háskóla Íslands vorið 2013, og voru flestar hönnunarákvarðanir teknar með hliðsjón af kennslu námskeiðsins, stuðst er meira og minna við málskipan og rit sem gefin voru sem dæmi, en málið er auka-afurð lærdómsins sem fólst í að skrifa lesgreini, þáttara og þýðanda.
+
+Kæri lesandi, áður en lengra er haldið við ég biðja þig að sýna umburðarlyndi frammi fyrir enskuslettum og öðrum málfarsvörtum.
+
+\section{Notkun og uppsetning}
+Notkun þýðandans er einföld, ef sótt er dreifiskrá SM: http://steinn.org/SM.tar.gz þá má setja upp og koma þýðandanum í keyrsluhæft ástand með eftirfarandi skipunum á flestum *NIX kerfum. Nauðsynlegt er að vera með flex++ uppsett:
+\begin{verbatim}
+~$ tar -zxf SM.tar.gz
+~$ cd SM
+~/SM$ make
+\end{verbatim}
+Ef engar villur koma fram við keyrslu "make", þá er SM þýðandinn þýddur. Til að nota hann fylgir með "compile" script sem tekur eitt viðfang: SM grunnkóða skrá. Lesið áfram í handbókinni fyrir nánari útlistun SM grunnkóðans, ásamt nokkrum dæmum í lokin. Fyrrnefnda "compile" scriptið býr til 2 skrár, ef allt gengur eftir: annars vegar .masm skrá sem inniheldur Morpho vélamál, og svo .mexe skrá sem er Morpho keyrsluskrá. Skrárnar bera sama grunnnafn og viðfangið við compile, dæmi:
+\begin{verbatim}
+~/SM$ ./compile forrit.sm
+~/SM$ ls -l forrit.masm
+-rw-rw-r-- 1 ses ses 831 Apr 23 14:28 forrit.masm
+~/SM$ ls -l forrit.mexe
+-rw-rw-r-- 1 ses ses 4213 Apr 23 14:28 forrit.mexe
+\end{verbatim}
+
+\section{Málfræði}
+\subsection{Frumeiningar málsins}
+\subsubsection{Athugasemdir}
+SM styður ekki athugasemdir.
+
+\subsubsection{Lykilorð}
+Eftirfarandi lykilorð eru í SM: {\tt fun}, {\tt val}, {\tt var}, {\tt if}, {\tt while}, {\tt true}, {\tt false}, og {\tt return}.
+
+\subsubsection{Sértákn}
+Táknin {\tt (} og {\tt )} (nefnd svigar héreftir) eru notuð til að afmarka segðir, og táknin {\tt \{} og {\tt \}} (nefnd slaufusvigar héreftir) til að tákna bálka.
+Málfræðilega eru slaufusvigar notaðir til að afmarka segðir falla, og conditional segða á borð við {\tt if} og {\tt while}. Umfram það hafa þeir ekki áhrif á földun eða umdæmi skilgreininga. 
+
+\subsection{Mállýsing}
+\begin{málrit}{id_list}
+	\begin{stack}
+	
+	\\
+		\begin{rep} <id> \\ `,' \end{rep}
+	\end{stack}
+\end{málrit}%
+
+\subsubsection{Forrit}
+
+\begin{málrit}{program}
+	\begin{rep}
+		<function>
+	\end{rep}
+\end{málrit}
+
+\subsubsection{Föll}
+
+\begin{málrit}{function}
+	<id> `(' <id_list> `)' <body>
+\end{málrit}
+
+\subsubsection{Stofnar}
+\begin{málrit}{body}
+	`{' 
+	<decls>
+	\begin{repnull} <expr> `;' \end{repnull}
+	`}' 
+\end{málrit}
+
+\subsubsection{Skilgreiningar}
+\begin{málrit}{decls}
+	\begin{repnull}
+		\begin{stack}
+			`var' \begin{rep} <id> \\ `,' \end{rep} `;'
+		\\
+			`val' \begin{rep} <id> `=' <expr> \\ `,' \end{rep} `;'
+		\end{stack}
+	\end{repnull}
+\end{málrit}
+
+\subsubsection{Segðir}
+
+\begin{málrit}{expr}
+	\begin{stack}
+		`return' <expr>
+	\\
+		<id> `=' <expr>
+	\\
+		<or_expr>
+	\end{stack}
+\end{málrit}
+
+\begin{málrit}{or_expr}
+	\begin{rep}
+		<and_expr>
+	\\
+		`||'
+	\end{rep}
+\end{málrit}
+
+\begin{málrit}{and_expr}
+	\begin{rep}
+		<not_expr>
+	\\
+		`&&'
+	\end{rep}
+\end{málrit}
+
+\begin{málrit}{not_expr}
+	\begin{repnull}
+		`!'
+	\end{repnull}
+	<binop_expr>
+\end{málrit}
+
+\begin{málrit}{binop_expr}
+	\begin{rep}
+		<small_expr>
+	\\
+		<op>
+	\end{rep}
+\end{málrit}
+
+\begin{málrit}{small_expr}
+	\begin{stack}
+		<op> <small_expr>
+	\\
+		`(' expr `)'
+	\\
+		<id>
+		\begin{stack}
+		\\
+		`('
+		\begin{repnull}
+			<expr>
+		\\
+			`,'
+		\end{repnull}
+		`)'
+		\end{stack}
+	\\
+		`while' expr  <body>
+	\\
+		`if' expr <body> <if_rest>
+	\\
+		`['
+		\begin{repnull}
+			<expr>
+		\\
+			`,'
+		\end{repnull}
+		`]'
+	\\
+		<int>
+	\\
+		<float>
+	\\
+		<string>
+	\\
+		<char>
+	\\
+		`true'
+	\\
+		`false'
+	\\
+		`null'
+	\end{stack}
+\end{málrit}
+
+\section{Merking málsins}
+\subsection{Gildi}
+SM styður fjórar gerðir gilda, heiltölur ({\tt int}), fleytitölur ({\tt double}), strengi ({\tt string}) og sanngildi ({\tt boolean}).
+\subsection{Breytur}
+Breytur þarf að skilgreina fremst í stofni hvers falls. Það má gera á tvo vegu, annarsvegar með lykilorðinu {\tt var}, sem býst við lista af breytunöfnum án upphafsgilda, og hinsvegar með lykilorðinu {\tt val} sem býst við lista af breytunöfnum með jafntog ({\tt =}) merki á milli breytnafns og gildis. Ef um lista er að ræða skal aðskilja breytur eða gildisveitingasegðir með kommu ({\tt ,}).
+\subsubsection{Heiltölur}
+SM þýðandinn túlkar alla strengi sem innihalda ekkert nema stafi á bilinu 0-9 sem heiltöluri ({\tt int}).
+\subsubsection{Fleytitölur}
+SM þýðandinn túlkar alla strengi sem innihalda ekkert nema stafi á bilinu 0-9, með einum punkti ({\tt .}) einhversstaðar í strengnum sem fleytitölur ({\tt double}).
+\subsubsection{Strengir}
+SM þýðandinn túlkar alla strengi sem hefjast og enda á gæsalöppum ({\tt ``}) sem strengi ({\tt string}), og fær breytan þá gildi strengsins sem liggur á milli gæsalappanna.
+\subsection{Merking segða}
+\subsubsection{Raungildasegðir}
+Í SM eru heiltölur, fleytitölur, strengir og sanngildi túlkuð sem sk. raungildi (e. \emph{literal}) og eiga að virka eins og í morpho.
+\subsubsection{return-segð}
+\subsubsection{Röksegðir}
+\subsubsection{Kallsegð}
+\subsubsection{Tvíundaraðgerðir}
+\subsubsection{Einundaraðgerðir}
+SM styður eina einundaraðgerð, sem er neitunaraðgerð. Hún er táknuð í málinu með upphrópunarmerki ({\tt !})
+\subsubsection{if-segð}
+\subsubsection{while-segð}
+\section{Til hliðsjónar ... hendið þessu eftir notkun}
+
+\subsection{Mállýsing með syntax pakkanum í LaTeX}
+
+\begin{grammar}
+<x> ::= <x> <y>
+	\alt <y> `x'
+\end{grammar}
+
+\subsection{Ýmis málrit með hjálp syntax pakkans í LaTeX}
+
+\end{document}
