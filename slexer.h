@@ -31,6 +31,19 @@ public:
 	}
 };
 
+class VarNotFoundError : public ParseError
+{
+public:
+	VarNotFoundError(string id)
+	{
+		Token t;
+		t.lineno = -1;
+		t.token = -1;
+		t.lexeme = id;
+		ParseError(t, "Variable not found");
+	};
+};
+
 class OperatorError : public ParseError
 {
 public:

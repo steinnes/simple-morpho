@@ -14,6 +14,8 @@ int token;
 
 int DEBUG = 0;
 int label_offset = 0;
+class Accounting;
+Accounting *acc;
 
 class Expression
 {
@@ -22,53 +24,6 @@ public:
 	virtual ~Expression() {};
 	virtual void EmitAcc(ostream&) {};
 };
-
-
-// Bókhald fyrir hvert fall
-typedef struct Var
-{
-	int index;
-	string name;
-	Expression *expr;
-} Var;
-
-class Accounting
-{
-private:
-	int cur_index;
-	map<string, Var> vars;
-public:
-	Accounting()
-	{
-		cur_index = 0;
-	};
-	bool AddVar(string id, Expression *e)
-	{
-		if (vars.find(id) != vars.end())
-			return false;
-		Var x;
-		x.index = cur_index++;
-		x.name = id;
-		x.expr = e;
-		vars[id] = x;
-		return true;
-	};
-	Var GetVar(string id)
-	{
-		return vars[id];
-	};
-	~Accounting()
-	{
-		for (map<string, Var>::const_iterator it=vars.begin(); it != vars.end(); it++)
-		{
-			Expression *e = (Expression *)(it->second.expr);
-			if (e != NULL)
-				delete e;
-		}
-	};
-};
-
-Accounting *acc;
 
 class ExprList : public Expression
 {
@@ -218,7 +173,93 @@ private:
 	Expression *value;
 public:
 	EAssign(int idx, Expression *e) : index(idx), value(e) { type = "EAssign"; };
+	void EmitAcc(ostream &o)
+	{
+		value->EmitAcc(o);
+		o << "(Store 0 " << index << ")" << endl;
+	};
 };
+
+// Bókhald fyrir hvert fall
+typedef struct Var
+{
+	int index;
+	string name;
+	Expression *expr;
+} Var;
+
+class Accounting
+{
+private:
+	int cur_index;
+	map<string, Var> vars;
+public:
+	Accounting()
+	{
+		cur_index = 0;
+	};
+	bool AddVar(string id, Expression *e)
+	{
+		//cout << "AddVar(" << id << ")" << endl;
+		//printall();
+		if (vars.find(id) != vars.end())
+			return false;
+		//cout << id << " was not found in vars" << endl;
+
+		if (e != NULL)
+			e = new EAssign(cur_index, e);
+		Var x;
+		x.index = cur_index;
+		x.name = id;
+		x.expr = e;
+		vars[id] = x;
+
+		cur_index += 1;
+		return true;
+	};
+	void printall()
+	{
+		for (map<string, Var>::const_iterator it=vars.begin(); it != vars.end(); it++)
+		{
+			string n = it->first;
+			Var v = it->second;
+			cout << n << "[" << v.index << "] " << endl;
+		}
+
+	};
+	Var GetVar(string id)
+	{
+		cout << "GetVar(" << id << ")" << endl;
+		if (vars.find(id) == vars.end())
+			throw VarNotFoundError(id);
+		return vars[id];
+	};
+	void EmitAcc(ostream &o)
+	{
+		for (map<string, Var>::const_iterator it=vars.begin(); it != vars.end(); it++)
+		{
+			Var v = it->second;
+			//cout << "Accounting emit:" << it->first << endl;
+			Expression *e = v.expr;
+			if (e != NULL)
+			{
+				//cout << "...=> " << e->type << endl;
+				e->EmitAcc(o);
+			}
+		}	
+	};
+	int index() { return cur_index; };
+	~Accounting()
+	{
+		for (map<string, Var>::const_iterator it=vars.begin(); it != vars.end(); it++)
+		{
+			Expression *e = (Expression *)(it->second.expr);
+			if (e != NULL)
+				delete e;
+		}
+	};
+};
+
 
 void error(char *errstr)
 {
@@ -356,6 +397,7 @@ Expression *expr(SLexer *l)
 	{
 		// 1. finna id position í *acc
 		Var v = acc->GetVar(t.lexeme);
+		l->skip();
 		// 2. returna EAssign(position, <expr>);
 		l->over(OP); // XXX: OP = "=" ??
 		return new EAssign(v.index, expr(l));
@@ -395,27 +437,26 @@ Expression *not_expr(SLexer *l)
 	return binop_expr(l, 1);
 }
 
-// þetta fall er ekki rétt..
-ExprList *decls(SLexer *l)
+void *decls(SLexer *l)
 {
-	ExprList *el = new ExprList();
 	Token t = l->advance();
 	int decltok = t.token;
 	while (!l->match(SEMICOLON))
 	{
 		t = l->advance();
+		//cout << "decls() processing: " << t.lexeme << " (" << t.token << ")" << endl;
+		assert(t.token == ID);
 		if (decltok == VAL)
 		{
-			string id = t.lexeme;
-			assert(t.token == ID);
-			l->over(OP); // XXX: verify that the operator is "=" ?
+			l->over(OP);
 			if (!acc->AddVar(t.lexeme, expr(l)))
 				throw ParseError(t, "Variable already defined..");
 		}
 		else if (decltok == VAR)
 		{
 			//el->Add(new EDecl(t.lexeme));
-			acc->AddVar(t.lexeme, NULL);
+			if (!acc->AddVar(t.lexeme, NULL))
+				throw ParseError(t, "Variable already defined..");
 		}
 		else
 			throw ParseError(t, "Parsing declaration, expected VAR/VAL");
@@ -423,7 +464,6 @@ ExprList *decls(SLexer *l)
 			l->skip();
 	}
 	l->over(SEMICOLON);
-	return el;
 }
 
 ExprList *body(SLexer *l)
@@ -433,7 +473,7 @@ ExprList *body(SLexer *l)
 
 	while (l->match(VAR) || l->match(VAL))
 	{
-		el->Add(decls(l));
+		decls(l);
 	}
 
 	while (!l->match(RBRACE))
@@ -447,7 +487,6 @@ ExprList *body(SLexer *l)
 
 void function(SLexer *l, ostream &o)
 {
-	vector<string> args;
 	string funcid;
 	l->over(FUN);
 	if (l->match(ID))
@@ -460,15 +499,19 @@ void function(SLexer *l, ostream &o)
 		{
 			Token t = l->advance();
 			if (t.token == ID)
-				args.push_back(t.lexeme);
+			{
+				if (!acc->AddVar(t.lexeme, NULL))
+					throw ParseError(t, "Invalid function parameter, duplicate?");
+			}
 			else
-				throw ParseError(t, "Invalid function parameters, expected ID");
+				throw ParseError(t, "Invalid function parameter, expected ID");
 			if (l->match(COMMA))
 				l->skip();
 		}
 		l->over(RPAREN);
-		o << "#\"" << funcid << "[f" << args.size() << "]\" =" << endl << "[" << endl;
+		o << "#\"" << funcid << "[f" << acc->index() << "]\" =" << endl << "[" << endl;
 		ExprList *el = body(l);
+		acc->EmitAcc(o);
 		el->EmitAcc(o);
 		o << "];" << endl;
 	}

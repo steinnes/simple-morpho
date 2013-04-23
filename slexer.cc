@@ -42,7 +42,10 @@ Token SLexer::advance()
 
 void SLexer::skip()
 {
-	q.pop();
+	if (q.size())
+		q.pop();
+	else
+		mkToken();
 }
 
 bool SLexer::over(int token)
