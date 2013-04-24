@@ -22,6 +22,7 @@ private:
 	deque<struct Token> q;
 	Token mkToken();
 public:
+	int last;
 	SLexer();
 	Token advance();
 	Token peek(int);

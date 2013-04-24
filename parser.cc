@@ -298,7 +298,7 @@ void function(SLexer *l, ostream &o)
 		o << "#\"" << funcid << "[f" << acc->index() << "]\" =" << endl << "[" << endl;
 		ExprList *el = body(l);
 		// return forced here... should force (MakeVal null) ... XXX
-		if (el->n() == 0)
+		if (el->n() == 0 || l->last != RETURN)
 			el->Add(new EReturn(NULL));
 
 		acc->EmitAcc(o);

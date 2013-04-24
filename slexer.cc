@@ -35,17 +35,24 @@ Token SLexer::advance()
 		q.pop_front();
 	}
 	else
-		t =mkToken();
+		t = mkToken();
 	if (DEBUG) fprintf(stderr, " %d %s\n", t.token, t.lexeme.c_str());
+	last = t.token;
 	return t;
 }
 
 void SLexer::skip()
 {
 	if (q.size())
+	{
+		last = q.front().token;
 		q.pop_front();
+	}
 	else
-		mkToken();
+	{
+		Token t = mkToken();
+		last = t.token;
+	}
 }
 
 bool SLexer::over(int token)
@@ -54,6 +61,7 @@ bool SLexer::over(int token)
 	if (!q.size())
 		q.push_back(mkToken());
 	t = q.front();
+	last = t.token;
 	if (t.token != token)
 	{
 		string errstr = "Invalid token! Expected: " + to_string(token);
