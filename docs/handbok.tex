@@ -242,62 +242,56 @@ SM styður while-segðir sem hefjast á lykilorðinu {\tt while} og taka inn skilyrð
 \begin{verbatim}
 fun add(a, b)
 {
-	var x;
-	x = a + b;
-	return x;
+    var x;
+    x = a + b;
+    return x;
 }
-
 fun main()
 {
-	val x = 10;
-	writeln(add(x, 7));
-	return 0;
+    val x = 10;
+    writeln(add(x, 7));
+    return 0;
 }
 \end{verbatim}
 \subsection{Forrit 2}
 \begin{verbatim}
 fun test(a,b)
 {
-	if (a && b)
-	{
-		writeln("if-1 and-1");
-		if (a && b)
-		{
-			writeln("if-2 and-2");
-		};
-	};
+    if (a && b)
+    {
+        writeln("if-1 and-1");
+        if (a && b)
+        {
+            writeln("if-2 and-2");
+        };
+    };
 }
-
 fun main()
 {
-	test(true,true);
+    test(true,true);
 }
 \end{verbatim}
 \subsection{Forrit 3}
 \begin{verbatim}
 fun main()
 {
-	val z = 11;
-
-	while (z > 0)
-	{
-		writeln(z);
-		z = z - 1;
-	};
-
-	z = 10;
-	writeln(z);
-	z = z * 2;
-	writeln(z);
-	z = z + z;
-	writeln(z);
-	z = z / 2;
-	writeln(z);
-
-	z = 3*4+1*2+6/2;
-	writeln(z);
-	return 0;
+    val z = 11;
+    while (z > 0)
+    {
+        writeln(z);
+        z = z - 1;
+    };
+    z = 10;
+    writeln(z);
+    z = z * 2;
+    writeln(z);
+    z = z + z;
+    writeln(z);
+    z = z / 2;
+    writeln(z);
+    z = 3*4+1*2+6/2;
+    writeln(z);
+    return 0;
 }
-
 \end{verbatim}
 \end{document}
