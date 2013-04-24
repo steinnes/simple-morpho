@@ -1,0 +1,11 @@
+#!/bin/sh
+if [ ! -f $1 ]; then
+	echo "Error: can't find $1"
+	exit
+fi
+progname=`echo $1|cut -d. -f1`
+
+./parser -o $progname < $1
+java -jar morpho.jar -c $progname.masm
+#rm $progname.masm
+
