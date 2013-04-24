@@ -46,6 +46,10 @@ Expression *ExprList::last()
 	else
 		return NULL;
 }
+int ExprList::n()
+{
+	return expr_list.size();
+}
 
 void ELiteral::EmitAcc(ostream &o)
 {

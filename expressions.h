@@ -24,6 +24,7 @@ public:
 	void Add(ExprList *e);
 	void EmitAcc(ostream &o);
 	void EmitArgs(ostream &o, int AR);
+	int n();
 	Expression *last();
 };
 

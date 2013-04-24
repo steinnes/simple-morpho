@@ -1,14 +1,10 @@
 fun main()
 {
-	var x;
 	val z = 11;
 
-	if (1 && 1)
+	while (z > 0)
 	{
-		5;
-	};
-	while (1)
-	{
-		10+10;
+		writeln(z);
+		z = z - 1;
 	};
 }

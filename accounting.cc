@@ -59,7 +59,6 @@ void Accounting::EmitAcc(ostream &o)
 		{
 			//cout << "...=> " << e->type << endl;
 			e->EmitAcc(o);
-			o << "(Store " << v.index << ")" << endl;
 		}
 	}	
 }

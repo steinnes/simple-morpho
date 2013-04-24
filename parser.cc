@@ -49,7 +49,6 @@ Expression *small_expr(SLexer *l)
 		case INT:
 		case FALSE:
 		case TRUE:
-			// expecting assignment ?
 			if (DEBUG) cerr << "Returning new ELiteral(" << token.lexeme << ")" << endl;
 			l->skip();
 			ELiteral *e;
@@ -72,9 +71,7 @@ Expression *small_expr(SLexer *l)
 			stmts = body(l);
 			return new EWhile(cnd, stmts);
 		case ID:
-			// XXX: this should mean ID(...) => function call!?
 			l->skip();
-			//cout << "Returning new EVar(" + token.lexeme + ")" << endl;
 			return new EVar(token.lexeme);
 		default:
 		break;
@@ -301,7 +298,7 @@ void function(SLexer *l, ostream &o)
 		o << "#\"" << funcid << "[f" << acc->index() << "]\" =" << endl << "[" << endl;
 		ExprList *el = body(l);
 		// return forced here... should force (MakeVal null) ... XXX
-		if (el->last() == NULL || el->last()->type != "EReturn")
+		if (el->n() == 0)
 			el->Add(new EReturn(NULL));
 
 		acc->EmitAcc(o);
@@ -320,17 +317,28 @@ void program(SLexer *l, ostream &o, string progname)
 		function(l, o);
 		delete acc;
 	}
-	o << "}}" << "*" << endl << "BASIS" << endl << ";" << endl;
+	o << "}}" << " *" << endl << "BASIS" << endl << ";" << endl;
 }
 
 int main(int argc, char *argv[])
 {
 	int c;
-	string progname = "einfalt"; // some lame default value
-	while ((c = getopt(argc, argv, "o:d")) != -1)
+	string progname = "default"; // some lame default value
+
+	if (argc < 2)
+	{
+		cerr << "Running without params, output to stdout, progname=" << progname << endl;
+	}
+	while ((c = getopt(argc, argv, "o:dh")) != -1)
 	{
 		switch (c)
 		{
+			case 'h':
+				cout << "Usage: " << endl << argv[0] << " [-d] [-o program] < source.sm " << endl;
+				cout << "\t -d :\t enables debugging output to stderr" << endl;
+				cout << "\t -o :\t enables debugging output to stderr" << endl;
+				return 1;
+
 			case 'o': // -o specified, set progname
 				progname = optarg;
 			break;
@@ -345,9 +353,14 @@ int main(int argc, char *argv[])
 	acc = new Accounting();
 	try
 	{
-		string fname = progname + ".masm";
-		//ofstream fout (fname.c_str(), std::ofstream::out);
-		program(lexer, cout, progname); 
+		if (progname != "default")
+		{
+			string fname = progname + ".masm";
+			ofstream fout (fname.c_str(), std::ofstream::out);
+			program(lexer, fout, progname); 
+		}
+		else
+			program(lexer, cout, progname); 
 	}
 	catch (ParseError e)
 	{
