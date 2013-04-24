@@ -1,0 +1,5 @@
+fun main(a, b)
+{
+        var i, j, k;
+        val x = 10, y = "test", z = "blargh";
+}

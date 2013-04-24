@@ -1,0 +1,16 @@
+fun test(a,b)
+{
+        if (a && b)
+        {
+                writeln("if-1 and-1");
+                if (a && b)
+                {
+                        writeln("if-2 and-2");
+                };
+        };
+}
+
+fun main()
+{
+	test(true,true);
+}
