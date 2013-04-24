@@ -49,7 +49,7 @@ SM gæti staðið fyrir "Steins Morpho", eða "Simple Morpho", en þar sem að málið s
 
 SM fæðist sem verkefni í námskeiðinu Þýðendur við Háskóla Íslands vorið 2013, og voru flestar hönnunarákvarðanir teknar með hliðsjón af kennslu námskeiðsins, stuðst er meira og minna við málskipan og rit sem gefin voru sem dæmi, en málið er auka-afurð lærdómsins sem fólst í að skrifa lesgreini og þáttara / einfaldan þýðanda.
 
-Kæri lesandi, áður en lengra er haldið við ég biðja þig að sýna umburðarlyndi frammi fyrir enskuslettum og öðrum málfarsvörtum.
+Kæri lesandi, áður en lengra er haldið við ég biðja þig að sýna umburðarlyndi frammi fyrir enskuslettum og öðrum málfarsvörtum. 
 
 \section{Notkun og uppsetning}
 Notkun þýðandans er einföld, ef sótt er dreifiskrá SM: http://steinn.org/SM.tar.gz þá má setja upp og koma þýðandanum í keyrsluhæft ástand með eftirfarandi skipunum á flestum *NIX kerfum. Nauðsynlegt er að vera með flex++ uppsett:
@@ -221,11 +221,11 @@ Reiknisegðir eru þær segðir SM sem skila gildi. Þær mega innihalda breytur, gild
 \subsubsection{Raungildasegðir}
 Í SM eru heiltölur, fleytitölur, strengir og sanngildi túlkuð sem sk. raungildi (e. \emph{literal}) og eiga að virka eins og í morpho.
 \subsubsection{Lista-segðir}
-Í SM eru ekki eiginlegar lista-segðir eins og í Morpho (enginn stuðningur við {\tt :}, {\tt [}, eða {\tt ]}) en listar koma þó tvisvar fyrir í málfræðinni. Annars vegar sem viðfangslistar falla, bæði í skilgreiningu falls og í fallsköllum, og hinsvegar í breytuskilgreiningum eins og kemur fram hér að ofan. Í báðum tilfellum eru komma ({\tt ,}) notuð til að aðgreina stök í listanum.
+Í SM eru ekki eiginlegar lista-segðir eins og í Morpho (enginn stuðningur við {\tt :}, {\tt [}, eða {\tt ]}).
 \subsubsection{return-segð}
 Return lykilorðið markar upphaf return-segðar sem endar keyrslu falls, þess vegna í miðjum stofni þess. Lykilorðið tekur við öllum löglegum <expr> segðum málsins, skv. málriti.
 \subsubsection{Röksegðir}
-SM styður röksegðirnar {\tt \&\&} og {\tt ||} og hegða þær sér eins og í Morpho. Veik tilraun til að útfæra "short circuit" var gerð, en engin ábyrgð er tekin af líkamlegum eða andlegum skaða er hlotist gæti af óhóflegu trausti á útfærslu þessara segða í SM.
+SM styður röksegðirnar {\tt \&\&} og {\tt ||} og hegða þær sér eins og í Morpho. Eins og sést á málriti hafa þessar röksegðir hærri forgang en aðrar tvíundaraðgerðir. Veik tilraun til að útfæra "short circuit" var gerð, en engin ábyrgð er tekin af líkamlegum eða andlegum skaða er hlotist gæti af óhóflegu trausti á útfærslu þessara segða í SM.
 \subsubsection{Kallsegð} 
 SM styður kallsegðir, og kalla má á föll úr öllum stofnum. Hvert viðfang kalls getur verið fullgild segð skv. málriti, og eins og lýst er hér að ofan. Föll skila gildum sínum með {\tt return}-segð, og má nota til gildisveitingar strax.
 \subsubsection{Tvíundaraðgerðir}
@@ -236,4 +236,68 @@ SM styður eina einundaraðgerð, sem er neitunaraðgerð. Hún er táknuð í málinu með
 SM styður if-segðir sem hefjast á lykilorðinu {\tt if} og taka inn skilyrði, afmarkað af svigum, skilyrðið er reiknisegð. Á eftir skilyrðinu kemur stofn afmarkaður af slaufusvigum. Ef reiknað sanngildi skilyrðisins er ekki {\tt false}, þá er stofninn keyrður. Ath. SM styður ekki else eða else-if segðir af neionu tagi.
 \subsubsection{while-segð}
 SM styður while-segðir sem hefjast á lykilorðinu {\tt while} og taka inn skilyrði, afmarkað af svigum, skilyrðið er reiknisegð. Á eftir skilyrðinu kemur stofn afmarkaður af slaufusvigum. Ef reiknað sanngildi skilyrðisins er ekki {\tt false}, þá er stofninn keyrður. Að lokinni keyrslu stofnsins er skilyrðið endurkeyrt, og ef það er enn ekki {\tt false}, þá er stofninn keyrður aftur. Þetta er endurtekið þar til skilyrðið tekur {\tt false} gildi.
+
+\section{Viðaukar}
+\subsection{Forrit 1}
+\begin{verbatim}
+fun add(a, b)
+{
+	var x;
+	x = a + b;
+	return x;
+}
+
+fun main()
+{
+	val x = 10;
+	writeln(add(x, 7));
+	return 0;
+}
+\end{verbatim}
+\subsection{Forrit 2}
+\begin{verbatim}
+fun test(a,b)
+{
+	if (a && b)
+	{
+		writeln("if-1 and-1");
+		if (a && b)
+		{
+			writeln("if-2 and-2");
+		};
+	};
+}
+
+fun main()
+{
+	test(true,true);
+}
+\end{verbatim}
+\subsection{Forrit 3}
+\begin{verbatim}
+fun main()
+{
+	val z = 11;
+
+	while (z > 0)
+	{
+		writeln(z);
+		z = z - 1;
+	};
+
+	z = 10;
+	writeln(z);
+	z = z * 2;
+	writeln(z);
+	z = z + z;
+	writeln(z);
+	z = z / 2;
+	writeln(z);
+
+	z = 3*4+1*2+6/2;
+	writeln(z);
+	return 0;
+}
+
+\end{verbatim}
 \end{document}
