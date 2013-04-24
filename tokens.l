@@ -17,7 +17,7 @@ FLOAT 		[0-9]*\.[0-9]+
 STRING		\"[^"]*\"
 TRUE		"true"|"TRUE"
 FALSE		"false"|"FALSE"
-OP 		[+\-\*<>]
+OP 		[+\-\*/<>]
 NEWLINE 	\r|\n|\r\n
 WHITESPACE      [\n\r\ \t\b\012]
 ID		[_a-zA-Z]+[a-zA-Z0-9_]*
@@ -46,6 +46,7 @@ NOT		"!"
 "if"		{ return(IF); }
 "while"		{ return(WHILE); }
 "return"	{ return(RETURN); }
+"null"		{ return(ENULL); }
 {NEWLINE} 	{ line++; }
 {WHITESPACE} 	{ }  // skip whitespaces
 "{"		{ return(LBRACE); }

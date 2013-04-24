@@ -7,4 +7,17 @@ fun main()
 		writeln(z);
 		z = z - 1;
 	};
+
+	z = 10;
+	writeln(z);
+	z = z * 2;
+	writeln(z);
+	z = z + z;
+	writeln(z);
+	z = z / 2;
+	writeln(z);
+
+	z = 3*4+1*2+6/2;
+	writeln(z);
+	return 0;
 }

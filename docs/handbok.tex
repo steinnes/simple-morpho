@@ -73,7 +73,7 @@ Ef engar villur koma fram við keyrslu "make", þá er SM þáttarinn þýddur. Til að 
 SM styður ekki athugasemdir.
 
 \subsubsection{Lykilorð}
-Eftirfarandi lykilorð eru í SM: {\tt fun}, {\tt val}, {\tt var}, {\tt if}, {\tt while}, {\tt true}, {\tt false}, og {\tt return}.
+Eftirfarandi lykilorð eru í SM: {\tt fun}, {\tt val}, {\tt var}, {\tt if}, {\tt while}, {\tt true}, {\tt false}, {\tt return}, og {\tt null}.
 
 \subsubsection{Sértákn}
 Táknin {\tt (} og {\tt )} (nefnd svigar héreftir) eru notuð til að afmarka segðir, og táknin {\tt \{} og {\tt \}} (nefnd slaufusvigar héreftir) til að tákna bálka.
@@ -158,49 +158,43 @@ Málfræðilega eru slaufusvigar notaðir til að afmarka segðir falla, og conditiona
 
 \begin{málrit}{binop_expr}
 	\begin{rep}
-		<small_expr>
+		<fun_expr>
 	\\
 		<op>
 	\end{rep}
+\end{málrit}
+
+\begin{málrit}{fun_expr}
+	\begin{stack}
+		<id>
+		\begin{stack}
+		\\
+			`('
+			\begin{repnull}
+				<expr>
+		\\
+				`,'
+			\end{repnull}
+			`)'
+		\end{stack}
+		\\
+		<small_expr>
+	\end{stack}
 \end{málrit}
 
 \begin{málrit}{small_expr}
 	\begin{stack}
 		<op> <small_expr>
 	\\
-		`(' expr `)'
-	\\
-		<id>
-		\begin{stack}
-		\\
-		`('
-		\begin{repnull}
-			<expr>
-		\\
-			`,'
-		\end{repnull}
-		`)'
-		\end{stack}
-	\\
 		`while' expr  <body>
 	\\
 		`if' expr <body> <if_rest>
-	\\
-		`['
-		\begin{repnull}
-			<expr>
-		\\
-			`,'
-		\end{repnull}
-		`]'
 	\\
 		<int>
 	\\
 		<float>
 	\\
 		<string>
-	\\
-		<char>
 	\\
 		`true'
 	\\
@@ -222,17 +216,24 @@ SM þáttarinn túlkar alla strengi sem innihalda ekkert nema stafi á bilinu 0-9, m
 \subsubsection{Strengir}
 SM þáttarinn túlkar alla strengi sem hefjast og enda á gæsalöppum ({\tt ``}) sem strengi ({\tt string}), og fær breytan þá gildi strengsins sem liggur á milli gæsalappanna.
 \subsection{Merking segða}
+\subsubsection{Reiknisegðir}
+Reiknisegðir eru þær segðir SM sem skila gildi. Þær mega innihalda breytur, gildi, röksegðir, kallsegðir og tvíundarsegðir. Reiknisegðir geta samanstaðið af mörgum liðum og er hver liður framkvæmdur skv. málriti, og þá fæst gildi segðarinnar. Þannig má nota segðina í gildisveitingu eða sem viðfang í aðrar segðir.
 \subsubsection{Raungildasegðir}
 Í SM eru heiltölur, fleytitölur, strengir og sanngildi túlkuð sem sk. raungildi (e. \emph{literal}) og eiga að virka eins og í morpho.
 \subsubsection{Lista-segðir}
-Í SM eru ekki eiginlegar lista-segðir eins og í Morpho (enginn stuðningur við {\tt :} virkjann t.d.) en listar koma þó tvisvar fyrir í málfræðinni. Annars vegar sem viðfangslistar falla, bæði í skilgreiningu falls og í fallsköllum, og hinsvegar í breytuskilgreiningum eins og kemur fram hér að ofan. Í báðum tilfellum eru komma ({\tt ,}) notuð til að aðgreina stök í listanum.
+Í SM eru ekki eiginlegar lista-segðir eins og í Morpho (enginn stuðningur við {\tt :}, {\tt [}, eða {\tt ]}) en listar koma þó tvisvar fyrir í málfræðinni. Annars vegar sem viðfangslistar falla, bæði í skilgreiningu falls og í fallsköllum, og hinsvegar í breytuskilgreiningum eins og kemur fram hér að ofan. Í báðum tilfellum eru komma ({\tt ,}) notuð til að aðgreina stök í listanum.
 \subsubsection{return-segð}
-Return lykilorðið markar upphaf return-segðar sem endar keyrslu falls, þess vegna í miðjum stofni þess. Lykilorðið tekur við 
+Return lykilorðið markar upphaf return-segðar sem endar keyrslu falls, þess vegna í miðjum stofni þess. Lykilorðið tekur við öllum löglegum <expr> segðum málsins, skv. málriti.
 \subsubsection{Röksegðir}
-\subsubsection{Kallsegð}
+SM styður röksegðirnar {\tt \&\&} og {\tt ||} og hegða þær sér eins og í Morpho. Veik tilraun til að útfæra "short circuit" var gerð, en engin ábyrgð er tekin af líkamlegum eða andlegum skaða er hlotist gæti af óhóflegu trausti á útfærslu þessara segða í SM.
+\subsubsection{Kallsegð} 
+SM styður kallsegðir, og kalla má á föll úr öllum stofnum. Hvert viðfang kalls getur verið fullgild segð skv. málriti, og eins og lýst er hér að ofan. Föll skila gildum sínum með {\tt return}-segð, og má nota til gildisveitingar strax.
 \subsubsection{Tvíundaraðgerðir}
+SM styður eftirfarandi reiknisegðir: {\tt +}, {\tt -}, {\tt *}, {\tt /}. Forgangsröðun er útfærð samkvæmt hefðbundnum stærðfræðireglum, svo að {\tt *}, {\tt /} aðgerðir eru framkvæmdar á undan {\tt +}, {\tt -}.
 \subsubsection{Einundaraðgerðir}
 SM styður eina einundaraðgerð, sem er neitunaraðgerð. Hún er táknuð í málinu með upphrópunarmerki ({\tt !})
 \subsubsection{if-segð}
+SM styður if-segðir sem hefjast á lykilorðinu {\tt if} og taka inn skilyrði, afmarkað af svigum, skilyrðið er reiknisegð. Á eftir skilyrðinu kemur stofn afmarkaður af slaufusvigum. Ef reiknað sanngildi skilyrðisins er ekki {\tt false}, þá er stofninn keyrður. Ath. SM styður ekki else eða else-if segðir af neionu tagi.
 \subsubsection{while-segð}
+SM styður while-segðir sem hefjast á lykilorðinu {\tt while} og taka inn skilyrði, afmarkað af svigum, skilyrðið er reiknisegð. Á eftir skilyrðinu kemur stofn afmarkaður af slaufusvigum. Ef reiknað sanngildi skilyrðisins er ekki {\tt false}, þá er stofninn keyrður. Að lokinni keyrslu stofnsins er skilyrðið endurkeyrt, og ef það er enn ekki {\tt false}, þá er stofninn keyrður aftur. Þetta er endurtekið þar til skilyrðið tekur {\tt false} gildi.
 \end{document}
