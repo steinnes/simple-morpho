@@ -3,6 +3,7 @@
 
 Accounting::Accounting()
 {
+	label_offset = 0;
 	ar = -1;
 	call_pos = 0;
 	cur_index = 0;
@@ -61,6 +62,28 @@ void Accounting::EmitAcc(ostream &o)
 			o << "(Store " << v.index << ")" << endl;
 		}
 	}	
+}
+
+int Accounting::nLabels()
+{
+	return labstack.size();
+}
+
+void Accounting::PushLabel(int label)
+{
+	labstack.push(label);
+}
+
+int Accounting::PopLabel()
+{
+	int l = labstack.top();
+	labstack.pop();
+	return l;
+}
+
+int Accounting::NewLabel()
+{
+	return label_offset++;
 }
 
 Accounting::~Accounting()

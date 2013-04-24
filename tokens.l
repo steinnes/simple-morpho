@@ -34,6 +34,8 @@ NOT		"!"
 {TRUE} 		{ return(TRUE); }
 {FALSE} 	{ return(FALSE); }
 {ASSIGN}	{ return(ASSIGN); }
+"=="		{ return(OP); }
+"!="		{ return(OP); }
 {OP} 		{ return(OP); }
 {OR}		{ return(OR); }
 {AND}		{ return(AND); }

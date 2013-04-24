@@ -16,7 +16,6 @@ using namespace std;
 int token;
 
 int DEBUG = 0;
-int label_offset = 0;
 Accounting *acc;
 
 void error(char *errstr)
@@ -211,6 +210,7 @@ Expression *and_expr(SLexer *l)
 	if (t.token == AND)
 	{
 		l->skip();
+		if (DEBUG) cerr << "Returning new EAnd..." << endl;
 		return new EAnd(a, and_expr(l));
 	}
 	return a;
@@ -300,6 +300,10 @@ void function(SLexer *l, ostream &o)
 		l->over(RPAREN);
 		o << "#\"" << funcid << "[f" << acc->index() << "]\" =" << endl << "[" << endl;
 		ExprList *el = body(l);
+		// return forced here... should force (MakeVal null) ... XXX
+		if (el->last() == NULL || el->last()->type != "EReturn")
+			el->Add(new EReturn(NULL));
+
 		acc->EmitAcc(o);
 		el->EmitAcc(o);
 		o << "];" << endl;

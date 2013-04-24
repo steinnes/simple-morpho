@@ -1,7 +1,6 @@
 #include "expressions.h"
 #include "accounting.h"
 extern int DEBUG;
-extern int label_offset;
 extern Accounting *acc;
 
 void Expression::EmitArg(ostream &o, int ar, int varpos)
@@ -23,6 +22,8 @@ void ExprList::EmitAcc(ostream &o)
 	{
 		Expression *e = *it;
 		e->EmitAcc(o);
+		if (acc->nLabels())
+			o << "_" << acc->PopLabel() << ":" << endl;
 	}
 }
 void ExprList::EmitArgs(ostream &o, int AR)
@@ -36,33 +37,32 @@ void ExprList::EmitArgs(ostream &o, int AR)
 	}
 }
 
+Expression *ExprList::last()
+{
+	if (expr_list.begin() != expr_list.end())
+	{
+		return *(expr_list.end());
+	}
+	else
+		return NULL;
+}
+
 void ELiteral::EmitAcc(ostream &o)
 {
 	o << "(MakeVal " << val << ")" << endl;
 }
 
-void EIf::EmitAcc(ostream &o)
-{
-	// XXX: finna rétt label offset?
-	cnd->EmitAcc(o);
-	int my_label = label_offset;
-	label_offset += 1;
-	o << "(GoFalse _" << my_label << ")" << endl;
-	stmts->EmitAcc(o);
-	o << "_" << my_label << ":" << endl;
-}
-
 void EWhile::EmitAcc(ostream &o)
 {
 	// XXX: finna rétt label offset?
-	int my_label = label_offset;
-	label_offset += 2;
-	o << "_" << my_label << ":" << endl;
+	int start = acc->NewLabel();
+	int end = acc->NewLabel();
+	o << "_" << start << ":" << endl;
 	cnd->EmitAcc(o);
-	o << "(GoFalse _" << my_label+1 << ")" << endl;
+	o << "(GoFalse _" << end << ")" << endl;
 	stmts->EmitAcc(o);
-	o << "(Go _" << my_label << ")" << endl;
-	o << "_" << my_label+1 << ":" << endl;
+	o << "(Go _" << start << ")" << endl;
+	o << "_" << end << ":" << endl;
 }
 
 void ECall::EmitAcc(ostream &o)
@@ -88,13 +88,42 @@ void EBinOp::EmitAcc(ostream &o)
 	o << "(Call #\"" << op << "[f2]\" " << AR << ")" << endl;
 }
 
-void EOr::EmitAcc(ostream &o) { }
-void EAnd::EmitAcc(ostream &o) { }
+void EOr::EmitAcc(ostream &o)
+{
+	int my_label = acc->NewLabel();
+	a->EmitAcc(o);
+	o << "(GoTrue _" << my_label << ")" << endl;
+	b->EmitAcc(o);
+	o << "_" << my_label << ":" << endl;
+}
+
+void EIf::EmitAcc(ostream &o)
+{
+	// XXX: finna rétt label offset?
+	cnd->EmitAcc(o);
+	int my_label = acc->NewLabel();
+	o << "(GoFalse _" << my_label << ")" << endl;
+	stmts->EmitAcc(o);
+	o << "_" << my_label << ":" << endl;
+}
+
+void EAnd::EmitAcc(ostream &o)
+{
+	int labfalse = acc->NewLabel();
+	int labtrue = acc->NewLabel();
+	a->EmitAcc(o);
+	o << "(GoFalse _" << labfalse << ")" << endl;
+	b->EmitAcc(o);
+	o << "_" << labtrue << ":" << endl;
+	acc->PushLabel(labfalse);
+}
+
 void ENot::EmitAcc(ostream &o) { }
 
 void EReturn::EmitAcc(ostream &o)
 {
-	e->EmitAcc(o);
+	if (e != NULL)
+			e->EmitAcc(o);
 	o << "(Return 0)" << endl;
 }
 
