@@ -1,0 +1,11 @@
+fun main()
+{
+	var x;
+
+	x = 1;
+	
+	x = x + 1;
+	writeln(x);
+	x = x * 2 + 1;
+	writeln(x);
+}
