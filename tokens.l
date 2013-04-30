@@ -17,7 +17,7 @@ FLOAT 		[0-9]*\.[0-9]+
 STRING		\"[^"]*\"
 TRUE		"true"|"TRUE"
 FALSE		"false"|"FALSE"
-OP 		[+\-\*/<>]
+OP 		[+\-\*/<>?~^:|&=!%]+
 NEWLINE 	\r|\n|\r\n
 WHITESPACE      [\n\r\ \t\b\012]
 ID		[_a-zA-Z]+[a-zA-Z0-9_]*
@@ -34,12 +34,10 @@ NOT		"!"
 {TRUE} 		{ return(TRUE); }
 {FALSE} 	{ return(FALSE); }
 {ASSIGN}	{ return(ASSIGN); }
-"=="		{ return(OP); }
-"!="		{ return(OP); }
-{OP} 		{ return(OP); }
-{OR}		{ return(OR); }
 {AND}		{ return(AND); }
 {NOT}		{ return(NOT); }
+{OR}		{ return(OR); }
+{OP} 		{ return(OP); }
 "fun"		{ return(FUN); }
 "val"		{ return(VAL); }
 "var"		{ return(VAR); }
