@@ -58,7 +58,7 @@ Notkun þýðandans er einföld, ef sótt er dreifiskrá SM: http://steinn.org/SM.tar.
 ~$ cd SM
 ~/SM$ make
 \end{verbatim}
-Ef engar villur koma fram við keyrslu "make", þá er SM þáttarinn þýddur. Til að nota hann fylgir með "compile" script sem tekur eitt viðfang: SM grunnkóða skrá. Lesið áfram í handbókinni fyrir nánari útlistun SM grunnkóðans, ásamt nokkrum dæmum í lokin. Fyrrnefnda "compile" scriptið býr til 2 skrár, ef allt gengur eftir: annars vegar .masm skrá sem inniheldur Morpho vélamál, og svo .mexe skrá sem er Morpho keyrsluskrá. Skrárnar bera sama grunnnafn og viðfangið við compile, dæmi:
+Ef engar villur koma fram við keyrslu "make", þá er SM þýðandinn þýddur. Til að nota hann fylgir með "compile" script sem tekur eitt viðfang: SM grunnkóða skrá. Lesið áfram í handbókinni fyrir nánari útlistun SM grunnkóðans, ásamt nokkrum dæmum í lokin. Fyrrnefnda "compile" scriptið býr til 2 skrár, ef allt gengur eftir: annars vegar .masm skrá sem inniheldur Morpho vélamál, og svo .mexe skrá sem er Morpho keyrsluskrá. Skrárnar bera sama grunnnafn og viðfangið við compile, dæmi:
 \begin{verbatim}
 ~/SM$ ./compile forrit.sm
 ~/SM$ ls -l forrit.masm
@@ -69,6 +69,9 @@ Ef engar villur koma fram við keyrslu "make", þá er SM þáttarinn þýddur. Til að 
 
 \section{Málfræði}
 \subsection{Frumeiningar málsins}
+\subsubsection{Hvít bil}
+SM túlkar öll bil (\emph{e. space}), inndrátt (\emph{e. tab}) og nýjar línur sem "hvít bil" (\emph{e. whitespaces}) og er lesgreininum sama um öll slík. 
+
 \subsubsection{Athugasemdir}
 SM styður ekki athugasemdir.
 
@@ -77,19 +80,18 @@ Eftirfarandi lykilorð eru í SM: {\tt fun}, {\tt val}, {\tt var}, {\tt if}, {\tt 
 
 \subsubsection{Sértákn}
 Táknin {\tt (} og {\tt )} (nefnd svigar héreftir) eru notuð til að afmarka segðir, og táknin {\tt \{} og {\tt \}} (nefnd slaufusvigar héreftir) til að tákna bálka.
-Málfræðilega eru slaufusvigar notaðir til að afmarka segðir falla, og conditional segða á borð við {\tt if} og {\tt while}. Umfram það hafa þeir ekki áhrif á földun eða umdæmi skilgreininga. 
+Málfræðilega eru slaufusvigar notaðir til að afmarka segðir falla, og conditional segða á borð við {\tt if} og {\tt while}. Umfram það hafa þeir ekki áhrif á földun eða umdæmi skilgreininga. Eins og fram kemur í mállýsingu hér að neðan er gert ráð fyrir að allar segðir endi á {\tt ;}.
+
+\subsubsection{Heiltölur}
+SM túlkar alla strengi sem innihalda ekkert nema stafi á bilinu 0-9 sem heiltöluri ({\tt int}).
+\subsubsection{Fleytitölur}
+SM túlkar alla strengi sem innihalda ekkert nema stafi á bilinu 0-9, með einum punkti ({\tt .}) einhversstaðar í strengnum sem fleytitölur ({\tt double}).
+\subsubsection{Strengir}
+SM túlkar alla strengi sem hefjast og enda á gæsalöppum ({\tt ``}) sem strengi ({\tt string}), og fær breytan þá gildi strengsins sem liggur á milli gæsalappanna.
 
 \subsection{Mállýsing}
-\begin{málrit}{id_list}
-	\begin{stack}
-	
-	\\
-		\begin{rep} <id> \\ `,' \end{rep}
-	\end{stack}
-\end{málrit}%
 
 \subsubsection{Forrit}
-
 \begin{málrit}{program}
 	\begin{rep}
 		<function>
@@ -97,9 +99,17 @@ Málfræðilega eru slaufusvigar notaðir til að afmarka segðir falla, og conditiona
 \end{málrit}
 
 \subsubsection{Föll}
-
 \begin{málrit}{function}
 	<id> `(' <id_list> `)' <body>
+\end{málrit}
+
+\subsection{Viðfangalistar}
+\begin{málrit}{id_list}
+	\begin{stack}
+	
+	\\
+		\begin{rep} <id> \\ `,' \end{rep}
+	\end{stack}
 \end{málrit}
 
 \subsubsection{Stofnar}
@@ -206,15 +216,9 @@ Málfræðilega eru slaufusvigar notaðir til að afmarka segðir falla, og conditiona
 
 \section{Merking málsins}
 \subsection{Gildi}
-SM styður fjórar gerðir gilda, heiltölur ({\tt int}), fleytitölur ({\tt double}), strengi ({\tt string}) og sanngildi ({\tt boolean}).
+SM styður sömu gildisgerðir og Morpho, en getur þó málfræðilega ekki unnið með föll sem gildi. Eins og fram kom í frumeiningum málsins styður lesgreinirinn þrjár gerðir af \emph{literal} gildum: heiltölur, fleytitölur og strengi. Þessi gildi eru því eins og Java samsvaranir sínar: int, double og String.
 \subsection{Breytur}
 Breytur þarf að skilgreina fremst í stofni hvers falls. Það má gera á tvo vegu, annarsvegar með lykilorðinu {\tt var}, sem býst við lista af breytunöfnum án upphafsgilda, og hinsvegar með lykilorðinu {\tt val} sem býst við lista af breytunöfnum með jafntog ({\tt =}) merki á milli breytnafns og gildis. Ef um lista er að ræða skal aðskilja breytur eða gildisveitingasegðir með kommu ({\tt ,}).
-\subsubsection{Heiltölur}
-SM þáttarinn túlkar alla strengi sem innihalda ekkert nema stafi á bilinu 0-9 sem heiltöluri ({\tt int}).
-\subsubsection{Fleytitölur}
-SM þáttarinn túlkar alla strengi sem innihalda ekkert nema stafi á bilinu 0-9, með einum punkti ({\tt .}) einhversstaðar í strengnum sem fleytitölur ({\tt double}).
-\subsubsection{Strengir}
-SM þáttarinn túlkar alla strengi sem hefjast og enda á gæsalöppum ({\tt ``}) sem strengi ({\tt string}), og fær breytan þá gildi strengsins sem liggur á milli gæsalappanna.
 \subsection{Merking segða}
 \subsubsection{Reiknisegðir}
 Reiknisegðir eru þær segðir SM sem skila gildi. Þær mega innihalda breytur, gildi, röksegðir, kallsegðir og tvíundarsegðir. Reiknisegðir geta samanstaðið af mörgum liðum og er hver liður framkvæmdur skv. málriti, og þá fæst gildi segðarinnar. Þannig má nota segðina í gildisveitingu eða sem viðfang í aðrar segðir.
@@ -225,11 +229,11 @@ Reiknisegðir eru þær segðir SM sem skila gildi. Þær mega innihalda breytur, gild
 \subsubsection{return-segð}
 Return lykilorðið markar upphaf return-segðar sem endar keyrslu falls, þess vegna í miðjum stofni þess. Lykilorðið tekur við öllum löglegum <expr> segðum málsins, skv. málriti.
 \subsubsection{Röksegðir}
-SM styður röksegðirnar {\tt \&\&} og {\tt ||} og hegða þær sér eins og í Morpho. Eins og sést á málriti hafa þessar röksegðir hærri forgang en aðrar tvíundaraðgerðir. Veik tilraun til að útfæra "short circuit" var gerð, en engin ábyrgð er tekin af líkamlegum eða andlegum skaða er hlotist gæti af óhóflegu trausti á útfærslu þessara segða í SM.
+SM styður röksegðirnar {\tt \&\&} og {\tt ||} og hegða þær sér eins og í Morpho. Eins og sést á málriti hafa þessar röksegðir hærri forgang en aðrar tvíundaraðgerðir.
 \subsubsection{Kallsegð} 
 SM styður kallsegðir, og kalla má á föll úr öllum stofnum. Hvert viðfang kalls getur verið fullgild segð skv. málriti, og eins og lýst er hér að ofan. Föll skila gildum sínum með {\tt return}-segð, og má nota til gildisveitingar strax.
 \subsubsection{Tvíundaraðgerðir}
-SM styður eftirfarandi reiknisegðir: {\tt +}, {\tt -}, {\tt *}, {\tt /}. Forgangsröðun er útfærð samkvæmt hefðbundnum stærðfræðireglum, svo að {\tt *}, {\tt /} aðgerðir eru framkvæmdar á undan {\tt +}, {\tt -}.
+SM styður sömu tvíundaraðgerðir og morpho.
 \subsubsection{Einundaraðgerðir}
 SM styður eina einundaraðgerð, sem er neitunaraðgerð. Hún er táknuð í málinu með upphrópunarmerki ({\tt !})
 \subsubsection{if-segð}
