@@ -31,10 +31,7 @@ public:
 	bool AddVar(string id, Expression *e);
 	Var GetVar(string id);
 	void EmitAcc(ostream &o);
-	void PushLabel(int label);
 	int NewLabel();
-	int PopLabel();
-	int nLabels();
 	int index() { return cur_index; };
 	void printall();
 };

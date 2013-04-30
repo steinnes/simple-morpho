@@ -22,8 +22,6 @@ void ExprList::EmitAcc(ostream &o)
 	{
 		Expression *e = *it;
 		e->EmitAcc(o);
-		if (acc->nLabels())
-			o << "_" << acc->PopLabel() << ":" << endl;
 	}
 }
 void ExprList::EmitArgs(ostream &o, int AR)

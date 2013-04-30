@@ -63,23 +63,6 @@ void Accounting::EmitAcc(ostream &o)
 	}	
 }
 
-int Accounting::nLabels()
-{
-	return labstack.size();
-}
-
-void Accounting::PushLabel(int label)
-{
-	labstack.push(label);
-}
-
-int Accounting::PopLabel()
-{
-	int l = labstack.top();
-	labstack.pop();
-	return l;
-}
-
 int Accounting::NewLabel()
 {
 	return label_offset++;
