@@ -94,11 +94,11 @@ void EBinOp::EmitAcc(ostream &o)
 
 void EOr::EmitAcc(ostream &o)
 {
-	int my_label = acc->NewLabel();
+	int labtrue = acc->NewLabel();
 	a->EmitAcc(o);
-	o << "(GoTrue _" << my_label << ")" << endl;
+	o << "(GoTrue _" << labtrue << ")" << endl;
 	b->EmitAcc(o);
-	o << "_" << my_label << ":" << endl;
+	o << "_" << labtrue << ":" << endl;
 }
 
 void EIf::EmitAcc(ostream &o)
@@ -114,12 +114,10 @@ void EIf::EmitAcc(ostream &o)
 void EAnd::EmitAcc(ostream &o)
 {
 	int labfalse = acc->NewLabel();
-	int labtrue = acc->NewLabel();
 	a->EmitAcc(o);
 	o << "(GoFalse _" << labfalse << ")" << endl;
 	b->EmitAcc(o);
-	o << "_" << labtrue << ":" << endl;
-	acc->PushLabel(labfalse);
+	o << "_" << labfalse << ":" << endl;
 }
 
 void ENot::EmitAcc(ostream &o) { }
